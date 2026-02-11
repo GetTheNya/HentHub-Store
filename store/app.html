@@ -102,7 +102,7 @@
 
             try {
                 const manifestUrl = CONFIG.mode === 'GITHUB'
-                    ? `https://${CONFIG.repoOwner}.github.io/${CONFIG.repoName}/manifests/store-manifest.json`
+                    ? `https://${CONFIG.repoOwner}.github.io/${CONFIG.repoName}/store/manifests/store-manifest.json`
                     : `${CONFIG.localUrl}/manifests/store-manifest.json`;
 
                 const res = await fetch(manifestUrl);
@@ -119,7 +119,7 @@
                 let iconUrl = app.iconUrl;
                 if (!iconUrl) {
                     iconUrl = CONFIG.mode === 'GITHUB'
-                        ? `https://github.com/${CONFIG.repoOwner}/${CONFIG.repoName}/raw/main/assets/icons/${app.appId.toLowerCase()}.png`
+                        ? `https://github.com/${CONFIG.repoOwner}/${CONFIG.repoName}/raw/main/store/assets/icons/${app.appId.toLowerCase()}.png`
                         : `${CONFIG.localUrl}/assets/icons/${app.appId.toLowerCase()}.png`;
                 }
 
@@ -130,7 +130,7 @@
                     screenshotsHtml = '<h2>Screenshots</h2><div class="screenshot-gallery">';
                     for (let i = 0; i < app.screenshotCount; i++) {
                         const ssUrl = CONFIG.mode === 'GITHUB'
-                            ? `https://github.com/${CONFIG.repoOwner}/${CONFIG.repoName}/raw/main/assets/screenshots/${app.appId.toLowerCase()}/${i}.png`
+                            ? `https://github.com/${CONFIG.repoOwner}/${CONFIG.repoName}/raw/main/store/assets/screenshots/${app.appId.toLowerCase()}/${i}.png`
                             : `${CONFIG.localUrl}/assets/screenshots/${app.appId.toLowerCase()}/${i}.png`;
                         screenshotsHtml += `<img src="${ssUrl}" alt="Screenshot ${i}">`;
                     }

@@ -8,7 +8,7 @@ async function loadApps() {
     try {
         let manifestUrl;
         if (CONFIG.mode === 'GITHUB') {
-            manifestUrl = `https://${CONFIG.repoOwner}.github.io/${CONFIG.repoName}/manifests/store-manifest.json`;
+            manifestUrl = `https://${CONFIG.repoOwner}.github.io/${CONFIG.repoName}/store/manifests/store-manifest.json`;
         } else {
             manifestUrl = `${CONFIG.localUrl}/manifests/store-manifest.json`;
         }
@@ -73,7 +73,7 @@ function createAppCard(app) {
     let iconUrl = app.iconUrl;
     if (!iconUrl) {
         if (CONFIG.mode === 'GITHUB') {
-            iconUrl = `https://github.com/${CONFIG.repoOwner}/${CONFIG.repoName}/raw/main/assets/icons/${app.appId.toLowerCase()}.png`;
+            iconUrl = `https://github.com/${CONFIG.repoOwner}/${CONFIG.repoName}/raw/main/store/assets/icons/${app.appId.toLowerCase()}.png`;
         } else {
             iconUrl = `${CONFIG.localUrl}/assets/icons/${app.appId.toLowerCase()}.png`;
         }
