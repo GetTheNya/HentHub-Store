@@ -1,0 +1,11 @@
+# Dependencies
+store-emulator/node_modules/
+node_modules/
+.hub
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Production Config (optional, if you want to keep local config untracked)
+# store/assets/js/config.js

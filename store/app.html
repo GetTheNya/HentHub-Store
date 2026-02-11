@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HentHub Store - App Details</title>
+    <link rel="stylesheet" href="assets/css/store.css">
+    <style>
+        .app-detail-header {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+        .app-detail-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            object-fit: contain;
+        }
+        .app-detail-info h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        .app-detail-meta {
+            color: var(--text-muted);
+            margin: 10px 0;
+        }
+        .screenshot-gallery {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin: 30px 0;
+        }
+        .screenshot-gallery img {
+            height: 300px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .screenshot-gallery img:hover {
+            transform: scale(1.02);
+        }
+        .app-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+        .app-section h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+        .install-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .install-btn:hover {
+            filter: brightness(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <div class="container" style="margin-top: 60px;">
+        <a href="index.html" style="position: absolute; top: 20px; right: 30px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">← Back to Store</a>
+        <div id="app-content">
+            <p>Loading app details...</p>
+        </div>
+    </div>
+
+    <script src="assets/js/config.js"></script>
+    <script>
+        async function loadAppDetails() {
+            const params = new URLSearchParams(window.location.search);
+            const appId = params.get('id');
+            const container = document.getElementById('app-content');
+
+            if (!appId) {
+                container.innerHTML = '<p>Error: No App ID provided.</p>';
+                return;
+            }
+
+            try {
+                const manifestUrl = CONFIG.mode === 'GITHUB'
+                    ? `https://${CONFIG.repoOwner}.github.io/${CONFIG.repoName}/manifests/store-manifest.json`
+                    : `${CONFIG.localUrl}/manifests/store-manifest.json`;
+
+                const res = await fetch(manifestUrl);
+                const data = await res.json();
+                const app = data.apps.find(a => a.appId === appId);
+
+                if (!app) {
+                    container.innerHTML = '<p>Error: App not found.</p>';
+                    return;
+                }
+
+                document.title = `${app.name} - HentHub Store`;
+
+                let iconUrl = app.iconUrl;
+                if (!iconUrl) {
+                    iconUrl = CONFIG.mode === 'GITHUB'
+                        ? `https://github.com/${CONFIG.repoOwner}/${CONFIG.repoName}/raw/main/assets/icons/${app.appId.toLowerCase()}.png`
+                        : `${CONFIG.localUrl}/assets/icons/${app.appId.toLowerCase()}.png`;
+                }
+
+                // For screenshots (this is a bit tricky if we don't know the count, in a real repo we'd use a folder list API or just guess 0.png, 1.png...)
+                // For now, let's assume we show a few or check if they exist via manifest if we updated it (I'll update the manifest to include screenshot count)
+                let screenshotsHtml = '';
+                if (app.screenshotCount > 0) {
+                    screenshotsHtml = '<h2>Screenshots</h2><div class="screenshot-gallery">';
+                    for (let i = 0; i < app.screenshotCount; i++) {
+                        const ssUrl = CONFIG.mode === 'GITHUB'
+                            ? `https://github.com/${CONFIG.repoOwner}/${CONFIG.repoName}/raw/main/assets/screenshots/${app.appId.toLowerCase()}/${i}.png`
+                            : `${CONFIG.localUrl}/assets/screenshots/${app.appId.toLowerCase()}/${i}.png`;
+                        screenshotsHtml += `<img src="${ssUrl}" alt="Screenshot ${i}">`;
+                    }
+                    screenshotsHtml += '</div>';
+                }
+
+                container.innerHTML = `
+                    <div class="app-detail-header">
+                        <img src="${iconUrl}" class="app-detail-icon" onerror="this.src='https://via.placeholder.com/120?text=App'">
+                        <div class="app-detail-info">
+                            <h1>
+                                ${app.name}
+                                ${app.terminalOnly ? '<span class="badge badge-terminal" style="font-size: 0.9rem; padding: 4px 12px;">Terminal Only</span>' : ''}
+                            </h1>
+                            <div class="app-detail-meta">
+                                by ${app.author} • v${app.version}
+                                ${app.terminalOnly ? ' • <span style="color:var(--accent)">CLI App</span>' : ''}
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <a href="henthub://id?=${app.appId}"><button class="install-btn">Install in HentHub</button></a>
+                                <div style="display: flex; gap: 10px;">
+                                    <a href="upload.html?id=${app.appId}"><button class="secondary" style="padding: 12px 20px;">Edit App</button></a>
+                                    <button class="danger" onclick="confirmDelete('${app.appId}', '${app.name}')" style="padding: 12px 20px;">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="app-section">
+                        <h2>Description</h2>
+                        <p>${app.description || 'No description provided.'}</p>
+                    </div>
+
+                    ${screenshotsHtml}
+
+                    <div class="grid-2">
+                        <div class="app-section">
+                            <h2>Dependencies</h2>
+                            <p>${app.dependencies && app.dependencies.length > 0 ? app.dependencies.join(', ') : 'None'}</p>
+                        </div>
+                        <div class="app-section">
+                            <h2>References</h2>
+                            <p>${app.references && app.references.length > 0 ? app.references.join(', ') : 'None'}</p>
+                        </div>
+                    </div>
+                `;
+
+            } catch (err) {
+                container.innerHTML = `<p style="color:var(--error)">Error: ${err.message}</p>`;
+            }
+        }
+
+        // Custom Modal Logic for app.html
+        let deletionCallback = null;
+
+        function showModal(title, body, type = 'attention', callback = null) {
+            const modal = document.getElementById('custom-modal');
+            const mTitle = document.getElementById('modal-title');
+            const mBody = document.getElementById('modal-body');
+            const mIcon = document.getElementById('modal-icon');
+            const mBtn = document.getElementById('modal-btn');
+            const mCancel = document.getElementById('modal-cancel');
+
+            mTitle.textContent = title;
+            mBody.innerHTML = body;
+            deletionCallback = callback;
+
+            modal.classList.remove('modal-error');
+            mCancel.style.display = callback ? 'block' : 'none';
+            mBtn.textContent = callback ? 'Confirm' : 'Got it';
+
+            if (type === 'error') {
+                modal.classList.add('modal-error');
+                mIcon.textContent = '❌';
+            } else if (type === 'success') {
+                mIcon.textContent = '✅';
+            } else {
+                mIcon.textContent = '⚠️';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+            deletionCallback = null;
+        }
+
+        function handleModalAction() {
+            if (deletionCallback) {
+                const cb = deletionCallback;
+                closeModal();
+                cb();
+            } else {
+                closeModal();
+            }
+        }
+
+        function confirmDelete(appId, name) {
+            showModal(
+                'Delete Application', 
+                `Are you sure you want to PERMANENTLY delete <b>${name}</b> (${appId})?<br><br><span style="color:var(--error)">This action cannot be undone.</span>`,
+                'attention',
+                () => deleteApp(appId)
+            );
+        }
+
+        async function deleteApp(appId) {
+            try {
+                if (CONFIG.mode === 'LOCAL') {
+                    const res = await fetch(`${CONFIG.localUrl}/delete-app`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ appId })
+                    });
+                    if (res.ok) {
+                        showModal('Success', 'Application deleted successfully!', 'success');
+                        setTimeout(() => location.href = 'index.html', 1500);
+                    } else {
+                        const errData = await res.json();
+                        throw new Error(errData.error || 'Deletion failed');
+                    }
+                } else {
+                    const token = prompt("Please enter your GitHub Token to authorize deletion:");
+                    if (!token) return;
+
+                    const owner = CONFIG.repoOwner;
+                    const repo = CONFIG.repoName;
+                    const manifestPath = 'manifests/store-manifest.json';
+                    const manifestUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${manifestPath}`;
+
+                    showModal('Authenticating', 'Fetching manifest from GitHub...', 'attention');
+                    const getRes = await fetch(manifestUrl, { headers: { 'Authorization': `token ${token}` } });
+                    if (!getRes.ok) throw new Error('Failed to fetch manifest from GitHub');
+                    
+                    const data = await getRes.json();
+                    const sha = data.sha;
+                    const manifest = JSON.parse(atob(data.content));
+
+                    const initialCount = manifest.apps.length;
+                    manifest.apps = manifest.apps.filter(a => a.appId.toUpperCase() !== appId.toUpperCase());
+                    
+                    if (manifest.apps.length === initialCount) {
+                        showModal('Not Found', 'App not found in manifest.', 'error');
+                        return;
+                    }
+
+                    manifest.lastUpdated = new Date().toISOString();
+
+                    const putRes = await fetch(manifestUrl, {
+                        method: 'PUT',
+                        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: `Delete app: ${appId}`,
+                            content: btoa(JSON.stringify(manifest, null, 2)),
+                            sha: sha
+                        })
+                    });
+
+                    if (putRes.ok) {
+                        showModal('Success', 'App deleted from GitHub successfully!', 'success');
+                        setTimeout(() => location.href = 'index.html', 1500);
+                    } else {
+                        throw new Error('Failed to update manifest on GitHub');
+                    }
+                }
+            } catch (err) {
+                showModal('Deletion Failed', err.message, 'error');
+                console.error(err);
+            }
+        }
+
+        loadAppDetails();
+    </script>
+
+    <div id="custom-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modal-icon" class="modal-icon">⚠️</span>
+                <h3 id="modal-title" class="modal-title">Attention</h3>
+            </div>
+            <div id="modal-body" class="modal-body">
+                Verification failed. Please check your inputs.
+            </div>
+            <div class="modal-footer">
+                <button id="modal-cancel" onclick="closeModal()" class="secondary" style="margin-right:10px; display:none;">Cancel</button>
+                <button id="modal-btn" onclick="handleModalAction()" class="modal-btn">Got it</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
