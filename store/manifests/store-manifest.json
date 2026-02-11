@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-11T20:09:03.906Z",
+  "lastUpdated": "2026-02-11T20:22:17.320Z",
   "apps": [
     {
       "appId": "NACHOS",
@@ -83,6 +83,33 @@
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/terminal-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/terminal.png",
       "publishedDate": "2026-02-11T19:53:57.726Z"
+    },
+    {
+      "appId": "HORIZON",
+      "name": "Horizon Web Browser",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "Expand your horizons. A fully integrated, Chromium-powered gateway to the World Wide Web. Fast, fluid, and limitless.",
+      "terminalOnly": false,
+      "singleInstance": true,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "HorizonBrowser.Program",
+      "entryMethod": "Main",
+      "size": 495840,
+      "icon": "horizon.png",
+      "screenshotCount": 1,
+      "dependencies": [],
+      "references": [
+        "FontStashSharp",
+        "CefSharp",
+        "CefSharp.Core",
+        "CefSharp.OffScreen",
+        "System.Private.Uri"
+      ],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/horizon-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/horizon.png",
+      "publishedDate": "2026-02-11T20:22:17.320Z"
     }
   ]
 }
