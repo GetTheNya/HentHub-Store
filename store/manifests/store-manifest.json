@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-11T20:26:48.560Z",
+  "lastUpdated": "2026-02-11T20:28:01.260Z",
   "apps": [
     {
       "appId": "NACHOS",
@@ -158,6 +158,29 @@
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/slice-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/slice.png",
       "publishedDate": "2026-02-11T20:26:48.560Z"
+    },
+    {
+      "appId": "NEONWAVE",
+      "name": "NeonWave",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "Experience audio visually. NeonWave transforms your library into a living, breathing light show.",
+      "terminalOnly": false,
+      "singleInstance": true,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "NeonWave.Program",
+      "entryMethod": "Main",
+      "size": 892183,
+      "icon": "neonwave.png",
+      "screenshotCount": 1,
+      "dependencies": [],
+      "references": [
+        "FontStashSharp"
+      ],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/neonwave-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/neonwave.png",
+      "publishedDate": "2026-02-11T20:28:01.260Z"
     }
   ]
 }
