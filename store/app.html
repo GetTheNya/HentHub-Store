@@ -116,6 +116,7 @@
 
                 document.title = `${app.name} - HentHub Store`;
 
+                let iconUrl = app.iconUrl;
                 if (!iconUrl) {
                     iconUrl = CONFIG.mode === 'GITHUB'
                         ? `assets/icons/${app.appId.toLowerCase()}.png`

@@ -6,6 +6,7 @@ async function loadApps() {
     const searchInput = document.getElementById('store-search');
 
     try {
+        let manifestUrl;
         if (CONFIG.mode === 'GITHUB') {
             manifestUrl = 'manifests/store-manifest.json';
         } else {
@@ -69,6 +70,7 @@ function createAppCard(app) {
     const card = document.createElement('div');
     card.className = 'app-card';
     
+    let iconUrl = app.iconUrl;
     if (!iconUrl) {
         if (CONFIG.mode === 'GITHUB') {
             iconUrl = `assets/icons/${app.appId.toLowerCase()}.png`;
