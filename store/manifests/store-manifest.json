@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-11T20:22:17.320Z",
+  "lastUpdated": "2026-02-11T20:23:40.897Z",
   "apps": [
     {
       "appId": "NACHOS",
@@ -110,6 +110,29 @@
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/horizon-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/horizon.png",
       "publishedDate": "2026-02-11T20:22:17.320Z"
+    },
+    {
+      "appId": "NEOFETCH",
+      "name": "Neofetch Utility",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "I can't believe it's not Linux.",
+      "terminalOnly": true,
+      "singleInstance": false,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "Neofetch.Program",
+      "entryMethod": "Main",
+      "size": 194084,
+      "icon": "neofetch.png",
+      "screenshotCount": 1,
+      "dependencies": [
+        "TERMINAL"
+      ],
+      "references": [],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/neofetch-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/neofetch.png",
+      "publishedDate": "2026-02-11T20:23:40.897Z"
     }
   ]
 }
