@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-11T20:24:54.734Z",
+  "lastUpdated": "2026-02-11T20:26:48.560Z",
   "apps": [
     {
       "appId": "NACHOS",
@@ -135,6 +135,29 @@
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/neofetch-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/neofetch.png",
       "publishedDate": "2026-02-11T20:23:40.897Z"
+    },
+    {
+      "appId": "SLICE",
+      "name": "Screen Capture",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "Precision screen capture. Cut a piece of reality and save it forever.",
+      "terminalOnly": false,
+      "singleInstance": true,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "ScreenCapture.Program",
+      "entryMethod": "Main",
+      "size": 378432,
+      "icon": "slice.png",
+      "screenshotCount": 1,
+      "dependencies": [],
+      "references": [
+        "FontStashSharp"
+      ],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/slice-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/slice.png",
+      "publishedDate": "2026-02-11T20:26:48.560Z"
     }
   ]
 }
