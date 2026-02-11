@@ -734,8 +734,8 @@ class HentHubUploader {
             }
 
             const fileName = `${appId.toLowerCase()}-v${version}.hub`;
-            const packagePath = `packages/${fileName}`;
-            const iconPath = `assets/icons/${appId.toLowerCase()}.png`;
+            const packagePath = `store/packages/${fileName}`;
+            const iconPath = `store/assets/icons/${appId.toLowerCase()}.png`;
 
             const iconFile = document.getElementById('icon-file').files[0];
             let iconBase64;
@@ -761,7 +761,7 @@ class HentHubUploader {
             for (let i = 0; i < screenshotFiles.length; i++) {
                 const content = await this.fileToBase64(screenshotFiles[i]);
                 screenshots.push({
-                    path: `assets/screenshots/${appId.toLowerCase()}/${i}.png`,
+                    path: `store/assets/screenshots/${appId.toLowerCase()}/${i}.png`,
                     content: content
                 });
             }
