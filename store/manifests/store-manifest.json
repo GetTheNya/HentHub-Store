@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-11T19:48:24.028Z",
+  "lastUpdated": "2026-02-11T19:53:57.726Z",
   "apps": [
     {
       "appId": "NACHOS",
@@ -58,6 +58,29 @@
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/sappc-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/sappc.png",
       "publishedDate": "2026-02-11T19:48:24.028Z"
+    },
+    {
+      "appId": "TERMINAL",
+      "name": "Terminal",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "he ultimate power tool. Control every aspect of HentOS via text commands. Scripting, file management, and system diagnostics included. Handle with care.",
+      "terminalOnly": false,
+      "singleInstance": false,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "TerminalApp.Program",
+      "entryMethod": "CreateWindow",
+      "size": 65667,
+      "icon": "terminal.png",
+      "screenshotCount": 1,
+      "dependencies": [],
+      "references": [
+        "FontStashSharp"
+      ],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/terminal-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/terminal.png",
+      "publishedDate": "2026-02-11T19:53:57.726Z"
     }
   ]
 }
