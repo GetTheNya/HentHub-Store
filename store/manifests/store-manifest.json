@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-11T20:23:40.897Z",
+  "lastUpdated": "2026-02-11T20:24:54.734Z",
   "apps": [
     {
       "appId": "NACHOS",
@@ -14,10 +14,12 @@
       "entryPoint": "Program.cs",
       "entryClass": "NACHOS.Program",
       "entryMethod": "Main",
-      "size": 1514177,
+      "size": 1514207,
       "icon": "nachos.png",
       "screenshotCount": 3,
-      "dependencies": [],
+      "dependencies": [
+        "SAPPC"
+      ],
       "references": [
         "FontStashSharp.MonoGame",
         "Microsoft.CodeAnalysis",
@@ -33,7 +35,7 @@
       ],
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/nachos-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/nachos.png",
-      "publishedDate": "2026-02-11T19:40:59.776Z"
+      "publishedDate": "2026-02-11T20:24:54.734Z"
     },
     {
       "appId": "SAPPC",
