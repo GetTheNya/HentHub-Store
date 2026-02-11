@@ -1021,7 +1021,7 @@ class HentHubUploader {
 
         // Update manifest
         this.log('Updating GitHub manifest...');
-        const manifestPath = 'manifests/store-manifest.json';
+        const manifestPath = 'store/manifests/store-manifest.json';
         const manifestUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${manifestPath}`;
 
         const getRes = await fetch(manifestUrl, { headers: { 'Authorization': `token ${token}` } });
