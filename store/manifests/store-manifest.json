@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-11T19:40:59.776Z",
+  "lastUpdated": "2026-02-11T19:48:24.028Z",
   "apps": [
     {
       "appId": "NACHOS",
@@ -34,6 +34,30 @@
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/nachos-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/nachos.png",
       "publishedDate": "2026-02-11T19:40:59.776Z"
+    },
+    {
+      "appId": "SAPPC",
+      "name": "SAPP Compiler",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "The backbone of the OS. SAPP Compiler translates high-level C# code into native HentOS applications in real-time. Fast, efficient, and integrated.",
+      "terminalOnly": true,
+      "singleInstance": true,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "Compiler.Program",
+      "entryMethod": "Main",
+      "size": 96176,
+      "icon": "sappc.png",
+      "screenshotCount": 0,
+      "dependencies": [],
+      "references": [
+        "Microsoft.CodeAnalysis",
+        "Microsoft.CodeAnalysis.CSharp"
+      ],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/sappc-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/sappc.png",
+      "publishedDate": "2026-02-11T19:48:24.028Z"
     }
   ]
 }
