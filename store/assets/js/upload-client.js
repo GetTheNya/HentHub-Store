@@ -99,7 +99,8 @@ class HentHubUploader {
 
         const fields = [
             'name', 'version', 'author', 'description', 
-            'entryPoint', 'entryClass', 'entryMethod', 'mainClass'
+            'entryPoint', 'entryClass', 'entryMethod', 'mainClass',
+            'minOSVersion'
         ];
 
         fields.forEach(field => {
@@ -451,7 +452,8 @@ class HentHubUploader {
                 const manifest = JSON.parse(e.target.result);
                 const fields = [
                     'appId', 'name', 'version', 'author', 
-                    'description', 'entryPoint', 'entryClass', 'entryMethod'
+                    'description', 'entryPoint', 'entryClass', 'entryMethod',
+                    'minOSVersion'
                 ];
                 fields.forEach(field => {
                     if (manifest[field] !== undefined) {
@@ -777,6 +779,7 @@ class HentHubUploader {
                 description: document.getElementById('description').value,
                 terminalOnly: this.terminalOnlyCheckbox.checked,
                 singleInstance: document.getElementById('singleInstance').checked,
+                minOSVersion: document.getElementById('minOSVersion').value || 'v1.0.0',
                 permissions: permissions,
                 entryPoint: document.getElementById('entryPoint').value,
                 entryClass: document.getElementById('entryClass').value,
@@ -866,6 +869,7 @@ class HentHubUploader {
             entryMethod: document.getElementById('entryMethod').value,
             terminalOnly: this.terminalOnlyCheckbox.checked,
             singleInstance: document.getElementById('singleInstance').checked,
+            minOSVersion: document.getElementById('minOSVersion').value || 'v1.0.0',
             permissions: permissions,
             icon: "icon.png", // Inside the package, it's always icon.png
             dependencies: Array.from(this.selectedDependencies),
