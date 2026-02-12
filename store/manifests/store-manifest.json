@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-11T20:09:03.906Z",
+  "lastUpdated": "2026-02-11T20:28:01.260Z",
   "apps": [
     {
       "appId": "NACHOS",
@@ -14,10 +14,12 @@
       "entryPoint": "Program.cs",
       "entryClass": "NACHOS.Program",
       "entryMethod": "Main",
-      "size": 1514177,
+      "size": 1514207,
       "icon": "nachos.png",
       "screenshotCount": 3,
-      "dependencies": [],
+      "dependencies": [
+        "SAPPC"
+      ],
       "references": [
         "FontStashSharp.MonoGame",
         "Microsoft.CodeAnalysis",
@@ -33,7 +35,7 @@
       ],
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/nachos-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/nachos.png",
-      "publishedDate": "2026-02-11T19:40:59.776Z"
+      "publishedDate": "2026-02-11T20:24:54.734Z"
     },
     {
       "appId": "SAPPC",
@@ -83,6 +85,102 @@
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/terminal-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/terminal.png",
       "publishedDate": "2026-02-11T19:53:57.726Z"
+    },
+    {
+      "appId": "HORIZON",
+      "name": "Horizon Web Browser",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "Expand your horizons. A fully integrated, Chromium-powered gateway to the World Wide Web. Fast, fluid, and limitless.",
+      "terminalOnly": false,
+      "singleInstance": true,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "HorizonBrowser.Program",
+      "entryMethod": "Main",
+      "size": 495840,
+      "icon": "horizon.png",
+      "screenshotCount": 1,
+      "dependencies": [],
+      "references": [
+        "FontStashSharp",
+        "CefSharp",
+        "CefSharp.Core",
+        "CefSharp.OffScreen",
+        "System.Private.Uri"
+      ],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/horizon-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/horizon.png",
+      "publishedDate": "2026-02-11T20:22:17.320Z"
+    },
+    {
+      "appId": "NEOFETCH",
+      "name": "Neofetch Utility",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "I can't believe it's not Linux.",
+      "terminalOnly": true,
+      "singleInstance": false,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "Neofetch.Program",
+      "entryMethod": "Main",
+      "size": 194084,
+      "icon": "neofetch.png",
+      "screenshotCount": 1,
+      "dependencies": [
+        "TERMINAL"
+      ],
+      "references": [],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/neofetch-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/neofetch.png",
+      "publishedDate": "2026-02-11T20:23:40.897Z"
+    },
+    {
+      "appId": "SLICE",
+      "name": "Screen Capture",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "Precision screen capture. Cut a piece of reality and save it forever.",
+      "terminalOnly": false,
+      "singleInstance": true,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "ScreenCapture.Program",
+      "entryMethod": "Main",
+      "size": 378432,
+      "icon": "slice.png",
+      "screenshotCount": 1,
+      "dependencies": [],
+      "references": [
+        "FontStashSharp"
+      ],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/slice-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/slice.png",
+      "publishedDate": "2026-02-11T20:26:48.560Z"
+    },
+    {
+      "appId": "NEONWAVE",
+      "name": "NeonWave",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "Experience audio visually. NeonWave transforms your library into a living, breathing light show.",
+      "terminalOnly": false,
+      "singleInstance": true,
+      "permissions": [],
+      "entryPoint": "Program.cs",
+      "entryClass": "NeonWave.Program",
+      "entryMethod": "Main",
+      "size": 892183,
+      "icon": "neonwave.png",
+      "screenshotCount": 1,
+      "dependencies": [],
+      "references": [
+        "FontStashSharp"
+      ],
+      "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/neonwave-v1.0.0.hub",
+      "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/neonwave.png",
+      "publishedDate": "2026-02-11T20:28:01.260Z"
     }
   ]
 }
