@@ -147,7 +147,7 @@
                                 ${app.terminalOnly ? '<span class="badge badge-terminal" style="font-size: 0.9rem; padding: 4px 12px;">Terminal Only</span>' : ''}
                             </h1>
                             <div class="app-detail-meta">
-                                by ${app.author} • v${app.version}${app.minOSVersion ? ` • Min OS: ${app.minOSVersion}` : ''}
+                                by ${app.author} • v${app.version} • Min OS: ${app.minOSVersion || 'v1.0.0'}
                                 ${app.terminalOnly ? ' • <span style="color:var(--accent)">CLI App</span>' : ''}
                             </div>
                             <div style="display: flex; gap: 10px;">
