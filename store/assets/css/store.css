@@ -125,7 +125,7 @@ button.danger:hover { background: var(--error); color: white; }
     overflow-y: auto;
     margin-top: 20px;
 }
-/* Badges */
+/* Badges & Tags */
 .badge {
     display: inline-flex;
     align-items: center;
@@ -143,6 +143,34 @@ button.danger:hover { background: var(--error); color: white; }
     border: 1px solid rgba(99, 102, 241, 0.4);
     margin-bottom: 2px;
 }
+
+.meta-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.meta-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.meta-tag b {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.meta-tag-author { border-left: 3px solid var(--accent); }
+.meta-tag-version { border-left: 3px solid #a855f7; }
+.meta-tag-os { border-left: 3px solid var(--success); }
 
 /* Modal Styles */
 .modal-overlay {

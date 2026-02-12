@@ -80,14 +80,19 @@ function createAppCard(app) {
     }
     
     card.innerHTML = `
-        <img src="${iconUrl}" class="app-icon" alt="${app.name}" onerror="this.src='https://via.placeholder.com/64?text=App'">
+        <img src="${iconUrl}" class="app-icon" alt="${app.name}">
         <div class="app-title">
             ${app.name}
             ${app.terminalOnly ? '<span class="badge badge-terminal">Terminal</span>' : ''}
         </div>
-        <div class="app-author">by ${app.author}</div>
+        <div class="meta-tags" style="justify-content: center;">
+            <span class="meta-tag meta-tag-author">by <b>${app.author}</b></span>
+            <span class="meta-tag meta-tag-os">Min OS: <b>${app.minOSVersion || 'v1.0.0'}</b></span>
+        </div>
         <div class="app-desc">${app.description || 'No description available.'}</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">v${app.version}</div>
+        <div class="meta-tags" style="justify-content: center; margin-bottom: 10px;">
+            <span class="meta-tag meta-tag-version">v<b>${app.version}</b></span>
+        </div>
         <div style="display: flex; gap: 10px; width: 100%;">
             <a href="app.html?id=${app.appId}" style="flex: 1;"><button style="width: 100%; background: rgba(255,255,255,0.1);">View Details</button></a>
             <a href="henthub://id?=${app.appId}" style="flex: 1;"><button style="width: 100%;">Install</button></a>
