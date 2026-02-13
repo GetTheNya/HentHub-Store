@@ -3,41 +3,77 @@ class HentHubUploader {
         this.form = document.getElementById('upload-form');
         this.terminal = document.getElementById('status-terminal');
         this.submitBtn = document.getElementById('submit-btn');
+        
+        // Stages
+        this.stages = [
+            document.getElementById('stage-1'),
+            document.getElementById('stage-2'),
+            document.getElementById('stage-3')
+        ];
+        this.currentStage = 1;
+
+        // Stage 1 Elements
+        this.manifestInput = document.getElementById('manifest-input');
+        this.manifestDropZone = document.getElementById('manifest-drop-zone');
+        this.manifestPreviewText = document.getElementById('manifest-preview-text');
+        this.nextToStage2Btn = document.getElementById('next-to-stage-2');
+
+        // Stage 2 Elements
+        this.appIdInput = document.getElementById('appId');
+        this.nameInput = document.getElementById('name');
+        this.extensionTypeInput = document.getElementById('extensionType');
+        this.typeBadge = document.getElementById('type-badge');
+        this.appFields = document.getElementById('app-fields');
+        this.widgetFields = document.getElementById('widget-fields');
+        this.iconInput = document.getElementById('icon-file');
+        this.iconDropZone = document.getElementById('icon-drop-zone');
+        this.screenshotsInput = document.getElementById('screenshot-files');
+        this.screenshotsDropZone = document.getElementById('screenshots-drop-zone');
         this.dropZone = document.getElementById('drop-zone');
         this.sourceInput = document.getElementById('source-input');
         this.fileList = document.getElementById('file-list');
-        this.appIdInput = document.getElementById('appId');
         this.idStatus = document.getElementById('id-status');
+        this.terminalOnlyCheckbox = document.getElementById('terminalOnly');
         this.depSearch = document.getElementById('dep-search');
         this.depResults = document.getElementById('dep-results');
         this.selectedDepsContainer = document.getElementById('selected-deps');
-        
-        this.selectedDependencies = new Set();
-        this.allApps = [];
+        this.refreshPolicySelect = document.getElementById('refreshPolicy');
+        this.intervalGroup = document.getElementById('interval-group');
 
-        // New Drop Zones
-        this.manifestDropZone = document.getElementById('manifest-drop-zone');
-        this.manifestInput = document.getElementById('manifest-input');
-        this.iconDropZone = document.getElementById('icon-drop-zone');
-        this.iconInput = document.getElementById('icon-file');
-        this.screenshotsDropZone = document.getElementById('screenshots-drop-zone');
-        this.screenshotsInput = document.getElementById('screenshot-files');
-        this.terminalOnlyCheckbox = document.getElementById('terminalOnly');
-        this.DEFAULT_TERMINAL_ICON_PATH = 'assets/icons/terminal_app.png';
-        this.lastManifestIcon = null;
+        // Stage 3 Elements
+        this.summaryContent = document.getElementById('summary-content');
+
+        this.referencesSection = document.getElementById('references-section');
+        this.referencesList = document.getElementById('references-list');
+
+        this.allApps = [];
+        this.selectedDependencies = new Set();
         this.isEditMode = false;
         this.editingAppId = null;
         this.initialVersion = null;
         this.currentEditingAppData = null;
+        this.lastManifestIcon = null;
 
-        this.initEventListeners();
-        this.fetchStoreManifest();
+        this.DEFAULT_TERMINAL_ICON_PATH = 'assets/icons/terminal.png';
 
         // Reveal this instance for modal buttons
         window.uploader = this;
 
+        this.init();
+    }
+
+    async init() {
         this.checkEditMode();
+        await this.fetchStoreManifest();
+        this.initEventListeners();
         this.checkProtocol();
+        
+        // Show initial stage
+        if (this.isEditMode) {
+            this.showStage(2);
+        } else {
+            this.showStage(1);
+        }
     }
 
     checkEditMode() {
@@ -57,6 +93,10 @@ class HentHubUploader {
             this.appIdInput.readOnly = true;
             this.appIdInput.style.opacity = '0.7';
             this.appIdInput.style.cursor = 'not-allowed';
+
+            // Hide Back to Stage 1 button in edit mode
+            const backBtn = document.getElementById('back-to-stage-1');
+            if (backBtn) backBtn.classList.add('hidden');
         }
     }
 
@@ -88,11 +128,30 @@ class HentHubUploader {
         }
     }
 
-    populateFormFromManifest(appId) {
-        const app = this.allApps.find(a => a.appId.toUpperCase() === appId.toUpperCase());
+    async populateFormFromManifest(appId) {
+        let app = this.allApps.find(a => a.appId.toUpperCase() === appId.toUpperCase());
         if (!app) {
             this.log(`Error: App ${appId} not found in store manifest.`, 'error');
             return;
+        }
+
+        // Fetch full manifest if this is a slim one (e.g. missing technical fields)
+        if (!app.entryPoint && !app.widgetClass) {
+            this.log(`Fetching full manifest for ${appId}...`, 'info');
+            try {
+                const subfolder = app.extensionType === 'widget' ? 'widgets' : 'application';
+                const url = CONFIG.mode === 'GITHUB'
+                    ? `manifests/${subfolder}/${appId.toLowerCase()}.json`
+                    : `${CONFIG.localUrl}/manifests/${subfolder}/${appId.toLowerCase()}.json`;
+                
+                const res = await fetch(url);
+                if (res.ok) {
+                    const fullManifest = await res.json();
+                    app = { ...app, ...fullManifest };
+                }
+            } catch (err) {
+                this.log(`Could not fetch full manifest: ${err.message}`, 'warning');
+            }
         }
 
         this.currentEditingAppData = app;
@@ -142,13 +201,54 @@ class HentHubUploader {
             if (pCtx) pCtx.value = app.permissions.join(', ');
         }
 
-        if (app.references && Array.isArray(app.references)) {
-            window.currentManifestReferences = app.references;
-            const refDisplay = document.getElementById('references-display');
-            if (refDisplay) {
-                refDisplay.textContent = app.references.join(', ');
-                refDisplay.style.color = 'var(--text-main)';
+        if (app.refreshPolicy) {
+            this.refreshPolicySelect.value = app.refreshPolicy;
+            const isInterval = app.refreshPolicy === 'Interval';
+            this.intervalGroup.classList.toggle('hidden', !isInterval);
+        }
+        if (app.intervalMs !== undefined) {
+            document.getElementById('intervalMs').value = app.intervalMs;
+        }
+
+        // Widget-specific fields
+        if (app.extensionType === 'widget') {
+            this.appFields.style.display = 'none';
+            this.widgetFields.style.display = 'block';
+            this.extensionTypeInput.value = 'widget';
+            this.typeBadge.textContent = 'Detected: Widget';
+
+            if (app.widgetClass) document.getElementById('widgetClass').value = app.widgetClass;
+            if (app.defaultSize) {
+                if (app.defaultSize.width) document.getElementById('width').value = app.defaultSize.width;
+                if (app.defaultSize.height) document.getElementById('height').value = app.defaultSize.height;
             }
+            if (app.isResizable !== undefined) document.getElementById('isResizable').checked = app.isResizable;
+            if (app.subscriptions) {
+                document.getElementById('subscriptions').value = Array.isArray(app.subscriptions) ? app.subscriptions.join(', ') : app.subscriptions;
+            }
+        } else {
+            this.appFields.style.display = 'block';
+            this.widgetFields.style.display = 'none';
+            this.extensionTypeInput.value = 'application';
+            this.typeBadge.textContent = 'Detected: Application';
+        }
+
+        const refs = app.references || app.References || [];
+        if (Array.isArray(refs) && refs.length > 0) {
+            window.currentManifestReferences = refs;
+            if (this.referencesSection) {
+                this.referencesSection.classList.remove('hidden');
+                this.referencesList.innerHTML = '';
+                refs.forEach(ref => {
+                    const tag = document.createElement('span');
+                    tag.className = 'meta-tag';
+                    tag.style.borderColor = 'var(--accent)';
+                    tag.innerHTML = `<b>${ref}</b>`;
+                    this.referencesList.appendChild(tag);
+                });
+            }
+        } else {
+            if (this.referencesSection) this.referencesSection.classList.add('hidden');
         }
 
         this.log(`Populated form for ${app.name} (Edit Mode)`, 'success');
@@ -320,8 +420,28 @@ class HentHubUploader {
         input.files = dt.files;
     }
 
+    showStage(stageNum) {
+        this.stages.forEach((stage, idx) => {
+            stage.style.display = (idx + 1 === stageNum) ? 'flex' : 'none';
+        });
+        this.currentStage = stageNum;
+        window.scrollTo(0, 0);
+    }
+
     initEventListeners() {
-        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        // Navigation Buttons
+        this.nextToStage2Btn.addEventListener('click', () => this.showStage(2));
+        document.getElementById('back-to-stage-1').addEventListener('click', () => this.showStage(1));
+        document.getElementById('next-to-stage-3').addEventListener('click', () => {
+            if (this.validateStage2()) {
+                this.renderSummary();
+                this.showStage(3);
+            }
+        });
+        document.getElementById('back-to-stage-2').addEventListener('click', () => this.showStage(2));
+
+        // Submit Button (Stage 3)
+        this.submitBtn.addEventListener('click', (e) => this.handleSubmit(e));
 
         // App ID availability check
         this.appIdInput.addEventListener('input', () => {
@@ -341,8 +461,16 @@ class HentHubUploader {
             }
         });
 
+        // Widget Refresh Policy Change
+        if (this.refreshPolicySelect) {
+            this.refreshPolicySelect.addEventListener('change', () => {
+                const isInterval = this.refreshPolicySelect.value === 'Interval';
+                this.intervalGroup.classList.toggle('hidden', !isInterval);
+            });
+        }
+
         // Initialize all drop zones
-        this.setupDropZone(this.manifestDropZone, this.manifestInput, 'manifest-preview', (file) => this.readManifestFile(file));
+        this.setupDropZone(this.manifestDropZone, this.manifestInput, 'manifest-preview-text', (file) => this.readManifestFile(file));
         this.setupDropZone(this.iconDropZone, this.iconInput, 'icon-preview');
         this.setupDropZone(this.screenshotsDropZone, this.screenshotsInput, 'screenshots-preview');
         
@@ -373,8 +501,6 @@ class HentHubUploader {
             const dropItems = e.dataTransfer.items;
             const dropFiles = e.dataTransfer.files;
 
-            this.log(`Drop detected: ${dropItems ? dropItems.length : 0} items, ${dropFiles ? dropFiles.length : 0} files.`, 'info');
-
             let entries = [];
             if (dropItems && dropItems.length > 0) {
                 entries = Array.from(dropItems)
@@ -382,39 +508,25 @@ class HentHubUploader {
                     .filter(entry => entry !== null);
             }
 
-            // Fallback for when DataTransferItem/webkitGetAsEntry isn't robust
             if (entries.length === 0) {
                 if (dropFiles.length > 0) {
-                    this.log('Using flat file list fallback.', 'warning');
                     this.sourceInput.files = dropFiles;
                     this.updateFileList();
-                    
-                    if (dropFiles.length === 1 && dropFiles[0].size === 0) {
-                        this.log('Warning: This browser version may not support recursive folder drops. Try using the file picker instead.', 'error');
-                    }
-                } else {
-                    this.log('No files detected in drop.', 'error');
                 }
                 return;
             }
 
-            this.log(`Scanning ${entries.length} top-level entries...`, 'info');
             const files = await this.scanFilesRecursively(entries);
-            this.log(`Scan complete: Found ${files.length} files.`, 'success');
-            
             if (files.length > 0) {
                 const dt = new DataTransfer();
                 files.forEach(f => dt.items.add(f));
                 this.sourceInput.files = dt.files;
                 this.updateFileList();
 
-                const manifestFile = files.find(f => {
-                    const name = f.name.toLowerCase();
-                    const path = (f.webkitRelativePath || "").toLowerCase().replace(/\\/g, '/');
-                    return name === 'manifest.json' || path.endsWith('/manifest.json') || path === 'manifest.json';
-                });
+                // If a manifest is found in the source files, update the form but don't jump stages automatically
+                const manifestFile = files.find(f => f.name.toLowerCase() === 'manifest.json');
                 if (manifestFile) {
-                    this.readManifestFile(manifestFile);
+                    this.readManifestFile(manifestFile, false); 
                 }
             }
         });
@@ -444,61 +556,109 @@ class HentHubUploader {
         }
     }
 
-    readManifestFile(file) {
+    readManifestFile(file, autoJump = true) {
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
                 const manifest = JSON.parse(e.target.result);
-                const fields = [
-                    'appId', 'name', 'version', 'author', 
-                    'description', 'entryPoint', 'entryClass', 'entryMethod',
-                    'minOSVersion'
-                ];
-                fields.forEach(field => {
-                    if (manifest[field] !== undefined) {
+                
+                // Detect Extension Type
+                const type = manifest.extensionType;
+                if (!type) {
+                    this.showModal('Invalid Manifest', 'Manifest is missing the required <code>extensionType</code> field (must be "application" or "widget").', 'error');
+                    this.manifestPreviewText.textContent = '❌ Error: Missing extensionType';
+                    this.manifestPreviewText.style.color = 'var(--error)';
+                    this.nextToStage2Btn.style.display = 'none';
+                    return;
+                }
+
+                this.extensionTypeInput.value = type;
+                this.typeBadge.textContent = `Detected: ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                
+                // Toggle app/widget specific fields
+                if (type === 'widget') {
+                    this.appFields.style.display = 'none';
+                    this.widgetFields.style.display = 'block';
+                    
+                    // Widget specific pre-fill
+                    const widgetFields = ['widgetClass', 'refreshPolicy', 'intervalMs'];
+                    widgetFields.forEach(field => {
+                        if (manifest[field] !== undefined) {
+                            const input = document.getElementById(field);
+                            if (input) input.value = manifest[field];
+                        }
+                    });
+                    
+                    if (manifest.defaultSize) {
+                        if (manifest.defaultSize.width) document.getElementById('width').value = manifest.defaultSize.width;
+                        if (manifest.defaultSize.height) document.getElementById('height').value = manifest.defaultSize.height;
+                    }
+                    
+                    if (manifest.isResizable !== undefined) {
+                        document.getElementById('isResizable').checked = manifest.isResizable;
+                    }
+                    
+                    if (manifest.subscriptions && Array.isArray(manifest.subscriptions)) {
+                        document.getElementById('subscriptions').value = manifest.subscriptions.join(', ');
+                    }
+                } else {
+                    this.appFields.style.display = 'block';
+                    this.widgetFields.style.display = 'none';
+                    
+                    // App specific pre-fill
+                    const appFields = ['entryPoint', 'entryClass', 'entryMethod'];
+                    appFields.forEach(field => {
+                        if (manifest[field] !== undefined) {
+                            const input = document.getElementById(field);
+                            if (input) input.value = manifest[field];
+                        }
+                    });
+
+                    if (manifest.singleInstance !== undefined) {
+                        document.getElementById('singleInstance').checked = manifest.singleInstance;
+                    }
+
+                    if (manifest.terminalOnly !== undefined) {
+                        this.terminalOnlyCheckbox.checked = manifest.terminalOnly;
+                        this.terminalOnlyCheckbox.dispatchEvent(new Event('change'));
+                    }
+                }
+
+                // Common fields pre-fill
+                const commonFields = ['appId', 'name', 'version', 'author', 'description', 'minOSVersion'];
+                commonFields.forEach(field => {
+                    let val = manifest[field];
+                    
+                    // Fallback for widget "id" if "appId" is missing
+                    if (field === 'appId' && val === undefined) {
+                        val = manifest.id;
+                    }
+
+                    if (val !== undefined) {
                         const input = document.getElementById(field);
                         if (input) {
-                            input.value = manifest[field];
-                            // Trigger input event for ID check
+                            input.value = val;
                             if (field === 'appId') input.dispatchEvent(new Event('input'));
                         }
                     }
                 });
 
-                if (manifest.singleInstance !== undefined) {
-                    const siCtx = document.getElementById('singleInstance');
-                    if (siCtx) siCtx.checked = manifest.singleInstance;
-                }
-
                 if (manifest.permissions && Array.isArray(manifest.permissions)) {
-                    const pCtx = document.getElementById('permissions');
-                    if (pCtx) pCtx.value = manifest.permissions.join(', ');
+                    document.getElementById('permissions').value = manifest.permissions.join(', ');
                 }
 
-                if (manifest.terminalOnly !== undefined) {
-                    this.terminalOnlyCheckbox.checked = manifest.terminalOnly;
-                    this.terminalOnlyCheckbox.dispatchEvent(new Event('change'));
+                if (manifest.refreshPolicy) {
+                    this.refreshPolicySelect.value = manifest.refreshPolicy;
+                    const isInterval = manifest.refreshPolicy === 'Interval';
+                    this.intervalGroup.classList.toggle('hidden', !isInterval);
+                }
+                if (manifest.intervalMs !== undefined) {
+                    document.getElementById('intervalMs').value = manifest.intervalMs;
                 }
 
                 if (manifest.icon) {
                     this.lastManifestIcon = manifest.icon;
-                    this.log(`Manifest specifies icon: ${this.lastManifestIcon}`, 'info');
-                }
-
-                const refDisplay = document.getElementById('references-display');
-                if (manifest.references && Array.isArray(manifest.references) && manifest.references.length > 0) {
-                    window.currentManifestReferences = manifest.references;
-                    if (refDisplay) {
-                        refDisplay.textContent = manifest.references.join(', ');
-                        refDisplay.style.color = 'var(--text-main)';
-                    }
-                } else {
-                    window.currentManifestReferences = [];
-                    if (refDisplay) {
-                        refDisplay.textContent = 'None';
-                        refDisplay.style.color = 'var(--text-dim)';
-                    }
                 }
 
                 if (manifest.dependencies && Array.isArray(manifest.dependencies)) {
@@ -506,8 +666,36 @@ class HentHubUploader {
                     this.selectedDepsContainer.innerHTML = '';
                     manifest.dependencies.forEach(d => this.addDependency(d));
                 }
+
+                // Handle References (Read-only)
+                const refs = manifest.references || manifest.References || [];
+                window.currentManifestReferences = refs;
                 
-                this.showModal('Form Auto-filled', 'Values have been synchronized from your <code>manifest.json</code> successfully!');
+                if (Array.isArray(refs) && refs.length > 0) {
+                    this.log(`Detected ${refs.length} library references`, 'info');
+                    if (this.referencesSection) {
+                        this.referencesSection.classList.remove('hidden');
+                        this.referencesList.innerHTML = '';
+                        refs.forEach(ref => {
+                            const tag = document.createElement('span');
+                            tag.className = 'meta-tag';
+                            tag.style.borderColor = 'var(--accent)';
+                            tag.innerHTML = `<b>${ref}</b>`;
+                            this.referencesList.appendChild(tag);
+                        });
+                    }
+                } else {
+                    if (this.referencesSection) this.referencesSection.classList.add('hidden');
+                }
+
+                if (autoJump) {
+                    this.manifestPreviewText.textContent = `✅ ${file.name} loaded (${type})`;
+                    this.manifestPreviewText.style.display = 'block';
+                    this.nextToStage2Btn.style.display = 'block';
+                    this.showStage(2);
+                }
+
+                this.log(`Manifest loaded: ${file.name} (${type})`, 'success');
             } catch (err) {
                 this.showModal('Parse Error', 'Error parsing manifest.json. Please ensure it is valid JSON.', 'error');
             }
@@ -515,21 +703,116 @@ class HentHubUploader {
         reader.readAsText(file);
     }
 
+    validateStage2() {
+        return this.validateForm();
+    }
+
+    renderSummary() {
+        const type = this.extensionTypeInput.value;
+        const appId = this.appIdInput.value;
+        const name = this.nameInput.value;
+        const author = document.getElementById('author').value;
+        const version = document.getElementById('version').value;
+        const desc = document.getElementById('description').value;
+
+        let iconSrc = 'favicon.png'; // Fallback
+        const iconFile = this.iconInput.files[0];
+        if (iconFile) {
+            iconSrc = URL.createObjectURL(iconFile);
+        } else if (this.terminalOnlyCheckbox.checked) {
+            iconSrc = this.DEFAULT_TERMINAL_ICON_PATH;
+        }
+
+        const screenshots = Array.from(this.screenshotsInput.files);
+        const screenshotPreviews = screenshots.map(f => `<img src="${URL.createObjectURL(f)}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border);">`).join('');
+
+        this.summaryContent.innerHTML = `
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 30px; margin-bottom: 30px;">
+                <div style="display: flex; gap: 30px; align-items: flex-start;">
+                    <img src="${iconSrc}" style="width: 120px; height: 120px; border-radius: 24px; background: #222; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h2 style="margin: 0; font-size: 2rem;">${name}</h2>
+                            <span class="tag" style="background: var(--accent);">${type.toUpperCase()}</span>
+                        </div>
+                        <div style="color: var(--text-muted); margin-bottom: 15px; font-size: 1.1rem;">
+                            by <b style="color: var(--text-main);">${author}</b> • v${version}
+                        </div>
+                        <p style="font-size: 1rem; line-height: 1.6; color: rgba(255,255,255,0.8); margin-bottom: 20px;">
+                            ${desc || 'No description provided.'}
+                        </p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+                    <h4 style="margin-bottom: 15px; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Store Preview (Screenshots)</h4>
+                    <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px;">
+                        ${screenshotPreviews || '<div style="color: var(--text-dim); font-style: italic;">No screenshots uploaded.</div>'}
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 20px;">
+                    <h4 style="margin-bottom: 15px; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Technical Specifications</h4>
+                    <div class="grid-2" style="font-size: 0.9rem;">
+                        <div>
+                            <div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">Package ID:</span> <code>${appId}</code></div>
+                            <div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">OS Requirement:</span> <code>v${document.getElementById('minOSVersion').value}</code></div>
+                            ${type === 'application' ? `
+                                <div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">Entry:</span> <code>${document.getElementById('entryClass').value}.${document.getElementById('entryMethod').value}</code></div>
+                            ` : `
+                                <div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">Widget Class:</span> <code>${document.getElementById('widgetClass').value}</code></div>
+                                <div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">Size:</span> <code>${document.getElementById('width').value}x${document.getElementById('height').value}</code></div>
+                            `}
+                        </div>
+                        <div>
+                            <div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">Permissions:</span> <code>${document.getElementById('permissions').value || 'NONE'}</code></div>
+                            <div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">Files:</span> ${this.sourceInput.files.length} detected</div>
+                        </div>
+                    </div>
+                    
+                    ${window.currentManifestReferences && window.currentManifestReferences.length > 0 ? `
+                        <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                            <span style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-bottom: 8px;">LIBRARY REFERENCES</span>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                ${window.currentManifestReferences.map(ref => `<span class="meta-tag" style="border-color: var(--accent); white-space: nowrap;"><b>${ref}</b></span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+
+            <div style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                <p>⚠️ Files will be uploaded to <code>store/${type === 'application' ? 'packages/application' : 'packages/widgets'}</code></p>
+            </div>
+        `;
+    }
+
     validateForm() {
+        const type = this.extensionTypeInput.value;
         const mandatory = [
             { id: 'appId', label: 'App ID' },
             { id: 'name', label: 'App Name' },
             { id: 'version', label: 'Version' },
-            { id: 'author', label: 'Author' },
-            { id: 'entryPoint', label: 'Entry Point' },
-            { id: 'entryClass', label: 'Entry Class' },
-            { id: 'entryMethod', label: 'Entry Method' }
+            { id: 'author', label: 'Author' }
         ];
+
+        if (type === 'widget') {
+            mandatory.push({ id: 'widgetClass', label: 'Widget Class' });
+            mandatory.push({ id: 'width', label: 'Width' });
+            mandatory.push({ id: 'height', label: 'Height' });
+        } else {
+            mandatory.push({ id: 'entryPoint', label: 'Entry Point' });
+            mandatory.push({ id: 'entryClass', label: 'Entry Class' });
+            mandatory.push({ id: 'entryMethod', label: 'Entry Method' });
+        }
 
         // Icon is mandatory only if NOT a terminal app OR if an icon is specifically selected
         const isTerminalFallback = this.terminalOnlyCheckbox.checked;
-        if (!isTerminalFallback) {
-            mandatory.push({ id: 'icon-file', label: 'App Icon', isFile: true, zoneId: 'icon-drop-zone' });
+        if (!isTerminalFallback && type !== 'widget') {
+            mandatory.push({ id: 'icon-file', label: 'Package Icon', isFile: true, zoneId: 'icon-drop-zone' });
+        } else if (type === 'widget') {
+            // Widgets ALWAYS need an icon for now (or a default)
+            mandatory.push({ id: 'icon-file', label: 'Widget Icon', isFile: true, zoneId: 'icon-drop-zone' });
         }
         
         mandatory.push({ id: 'source-input', label: 'Source Files', isFile: true, zoneId: 'drop-zone' });
@@ -735,9 +1018,11 @@ class HentHubUploader {
                 this.log('No new files to package.', 'info');
             }
 
+            const type = this.extensionTypeInput.value;
+            const subfolder = type === 'widget' ? 'widgets' : 'application';
             const fileName = `${appId.toLowerCase()}-v${version}.hub`;
-            const packagePath = `store/packages/${fileName}`;
-            const iconPath = `store/assets/icons/${appId.toLowerCase()}.png`;
+            const packagePath = `store/packages/${subfolder}/${fileName}`;
+            const iconPath = `store/assets/icons/${subfolder}/${appId.toLowerCase()}.png`;
 
             const iconFile = document.getElementById('icon-file').files[0];
             let iconBase64;
@@ -750,7 +1035,7 @@ class HentHubUploader {
                 const blob = await resp.blob();
                 iconBase64 = await this.fileToBase64(blob);
             } else if (!this.isEditMode) {
-                throw new Error("Missing application icon.");
+                throw new Error("Missing package icon.");
             }
 
             let packageBase64 = null;
@@ -763,7 +1048,7 @@ class HentHubUploader {
             for (let i = 0; i < screenshotFiles.length; i++) {
                 const content = await this.fileToBase64(screenshotFiles[i]);
                 screenshots.push({
-                    path: `store/assets/screenshots/${appId.toLowerCase()}/${i}.png`,
+                    path: `store/assets/screenshots/${subfolder}/${appId.toLowerCase()}/${i}.png`,
                     content: content
                 });
             }
@@ -774,6 +1059,7 @@ class HentHubUploader {
             const appMetadata = {
                 appId,
                 name: document.getElementById('name').value,
+                extensionType: type,
                 version,
                 author: document.getElementById('author').value,
                 description: document.getElementById('description').value,
@@ -784,6 +1070,17 @@ class HentHubUploader {
                 entryPoint: document.getElementById('entryPoint').value,
                 entryClass: document.getElementById('entryClass').value,
                 entryMethod: document.getElementById('entryMethod').value,
+                // Widget specific fields
+                widgetClass: document.getElementById('widgetClass').value,
+                defaultSize: {
+                    width: parseFloat(document.getElementById('width').value),
+                    height: parseFloat(document.getElementById('height').value)
+                },
+                isResizable: document.getElementById('isResizable').checked,
+                refreshPolicy: document.getElementById('refreshPolicy').value,
+                intervalMs: parseInt(document.getElementById('intervalMs').value || 0),
+                subscriptions: document.getElementById('subscriptions').value.split(',').map(s => s.trim()).filter(s => s),
+                
                 size: zipBlob ? zipBlob.size : (this.currentEditingAppData ? this.currentEditingAppData.size : 0),
                 icon: `${appId.toLowerCase()}.png`,
                 screenshotCount: screenshotFiles.length > 0 ? screenshotFiles.length : (this.currentEditingAppData ? this.currentEditingAppData.screenshotCount : 0),
@@ -860,13 +1157,26 @@ class HentHubUploader {
 
         const manifest = {
             appId: this.appIdInput.value.toUpperCase(),
+            ...(this.extensionTypeInput.value === 'widget' ? { id: this.appIdInput.value.toUpperCase() } : {}),
             name: document.getElementById('name').value,
+            extensionType: this.extensionTypeInput.value,
             version: document.getElementById('version').value,
             author: document.getElementById('author').value,
             description: document.getElementById('description').value,
             entryPoint: document.getElementById('entryPoint').value,
             entryClass: document.getElementById('entryClass').value,
             entryMethod: document.getElementById('entryMethod').value,
+            // Widget specific fields
+            widgetClass: document.getElementById('widgetClass').value,
+            defaultSize: {
+                width: parseFloat(document.getElementById('width').value),
+                height: parseFloat(document.getElementById('height').value)
+            },
+            isResizable: document.getElementById('isResizable').checked,
+            refreshPolicy: document.getElementById('refreshPolicy').value,
+            intervalMs: parseInt(document.getElementById('intervalMs').value || 0),
+            subscriptions: document.getElementById('subscriptions').value.split(',').map(s => s.trim()).filter(s => s),
+
             terminalOnly: this.terminalOnlyCheckbox.checked,
             singleInstance: document.getElementById('singleInstance').checked,
             minOSVersion: document.getElementById('minOSVersion').value || '1.0.0',
@@ -947,8 +1257,18 @@ class HentHubUploader {
             await upload(ss.path, ss.content);
         }
 
-        // 3. Update manifest
-        this.log('Updating local store manifest...');
+        // 3. Save FULL individual manifest
+        const subfolder = metadata.extensionType === 'widget' ? 'widgets' : 'application';
+        const individualManifestPath = `manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
+        this.log(`Saving individual manifest: ${individualManifestPath}...`);
+        await fetch(`${CONFIG.localUrl}/update-manifest`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: individualManifestPath, content: metadata })
+        });
+
+        // 4. Update browsing manifest (SLIM)
+        this.log('Updating local store manifest (slim)...');
         const manifestPath = 'manifests/store-manifest.json';
         let manifestData = { apps: [] };
         try {
@@ -959,16 +1279,24 @@ class HentHubUploader {
             }
         } catch (e) {}
 
-        const appEntry = {
-            ...metadata,
+        const slimEntry = {
+            appId: metadata.appId,
+            name: metadata.name,
+            extensionType: metadata.extensionType,
+            version: metadata.version,
+            author: metadata.author,
+            description: metadata.description,
+            minOSVersion: metadata.minOSVersion,
+            terminalOnly: metadata.terminalOnly,
+            screenshotCount: metadata.screenshotCount,
             downloadUrl: `${CONFIG.localUrl}/${pkgPath}`,
             iconUrl: `${CONFIG.localUrl}/${iconPath}`,
             publishedDate: new Date().toISOString()
         };
 
         const idx = manifestData.apps.findIndex(a => a.appId === metadata.appId);
-        if (idx >= 0) manifestData.apps[idx] = appEntry;
-        else manifestData.apps.push(appEntry);
+        if (idx >= 0) manifestData.apps[idx] = slimEntry;
+        else manifestData.apps.push(slimEntry);
 
         manifestData.lastUpdated = new Date().toISOString();
 
@@ -1023,35 +1351,46 @@ class HentHubUploader {
             await githubPut(ss.path, ss.content, `Upload ${metadata.appId} screenshot`, ssSha);
         }
 
-        // Update manifest
-        this.log('Updating GitHub manifest...');
+        // 5. Update browsing manifest (SLIM)
+        this.log('Updating GitHub store manifest (slim)...');
         const manifestPath = 'store/manifests/store-manifest.json';
-        const manifestUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${manifestPath}`;
-
-        const getRes = await fetch(manifestUrl, { headers: { 'Authorization': `token ${token}` } });
-        let sha = null;
+        const manifestSha = await getSha(manifestPath);
         let manifestData = { apps: [] };
-        if (getRes.ok) {
-            const data = await getRes.json();
-            sha = data.sha;
-            manifestData = JSON.parse(atob(data.content));
+        
+        const mRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${manifestPath}`);
+        if (mRes.ok) {
+            const mData = await mRes.json();
+            manifestData = JSON.parse(atob(mData.content));
             if (!manifestData.apps) manifestData.apps = [];
         }
 
-        const appEntry = {
-            ...metadata,
-            downloadUrl: `https://github.com/${owner}/${repo}/raw/main/${pkgPath}`,
-            iconUrl: `https://github.com/${owner}/${repo}/raw/main/${iconPath}`,
+        const slimEntry = {
+            appId: metadata.appId,
+            name: metadata.name,
+            extensionType: metadata.extensionType,
+            version: metadata.version,
+            author: metadata.author,
+            description: metadata.description,
+            minOSVersion: metadata.minOSVersion,
+            terminalOnly: metadata.terminalOnly,
+            screenshotCount: metadata.screenshotCount,
+            downloadUrl: `https://${owner}.github.io/${repo}/store/packages/${subfolder}/${appId.toLowerCase()}-v${version}.hub`,
+            iconUrl: `https://${owner}.github.io/${repo}/store/assets/icons/${subfolder}/${appId.toLowerCase()}.png`,
             publishedDate: new Date().toISOString()
         };
 
         const idx = manifestData.apps.findIndex(a => a.appId === metadata.appId);
-        if (idx >= 0) manifestData.apps[idx] = appEntry;
-        else manifestData.apps.push(appEntry);
+        if (idx >= 0) manifestData.apps[idx] = slimEntry;
+        else manifestData.apps.push(slimEntry);
 
         manifestData.lastUpdated = new Date().toISOString();
-
-        await githubPut(manifestPath, btoa(JSON.stringify(manifestData, null, 2)), `Update manifest for ${metadata.appId}`, sha);
+        await githubPut(manifestPath, btoa(JSON.stringify(manifestData, null, 2)), `Update store manifest (slim): ${metadata.appId}`, manifestSha);
+        
+        // 6. Save FULL individual manifest
+        const individualManifestPath = `store/manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
+        this.log(`Pushing individual manifest to GitHub: ${individualManifestPath}...`);
+        const individualSha = await getSha(individualManifestPath);
+        await githubPut(individualManifestPath, btoa(JSON.stringify(metadata, null, 2)), `Save full manifest: ${metadata.appId}`, individualSha);
     }
 
     async scanFilesRecursively(entries) {

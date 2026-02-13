@@ -14,6 +14,15 @@
             flex-direction: column;
             padding-bottom: 20px;
         }
+        .upload-stage {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        .hidden {
+            display: none !important;
+        }
         .form-header {
             flex-shrink: 0;
             margin-bottom: 20px;
@@ -253,139 +262,224 @@
 
     <div class="container">
         <a href="index.html" style="position: absolute; top: 20px; right: 30px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">← Back to Store</a>
-        <div class="form-header">
-            <h1>Developer Upload</h1>
-            <p style="margin-bottom: 20px;">Publish your application to the HentHub Store. You can upload an existing <code>manifest.json</code> to auto-fill the form.</p>
-
-            <div class="form-group" style="margin-bottom: 0;">
-                <label>Auto-fill from manifest.json</label>
-                <div id="manifest-drop-zone" class="small-drop-zone">
+        
+        <!-- Stage 1: Manifest Upload -->
+        <div id="stage-1" class="upload-stage">
+            <div class="form-header">
+                <h1>Step 1: Upload Manifest</h1>
+                <p>Upload your <code>manifest.json</code> to begin. We'll automatically detect if it's an Application or a Widget.</p>
+            </div>
+            <div class="form-group">
+                <div id="manifest-drop-zone" class="drop-zone" style="padding: 60px;">
                     Drop manifest.json here or click to browse
-                    <div id="manifest-preview" style="font-size: 0.8rem; margin-top: 5px; color: var(--accent); display: none;"></div>
+                    <div id="manifest-preview-text" style="font-size: 1rem; margin-top: 15px; color: var(--accent); font-weight: bold; display: none;"></div>
                 </div>
                 <input type="file" id="manifest-input" accept=".json" style="display: none;">
             </div>
+            <button id="next-to-stage-2" class="stage-btn" style="width: 100%; display: none;">Continue to Details</button>
         </div>
 
-        <form id="upload-form" novalidate>
-            <div class="form-content">
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>App ID (e.g. NOTEPAD) <span style="color:var(--error)">*</span></label>
-                        <input type="text" id="appId" required placeholder="Unique internal ID">
-                        <div id="id-status" class="id-status"></div>
+        <!-- Stage 2: Details & Assets -->
+        <div id="stage-2" class="upload-stage" style="display: none;">
+            <div class="form-header">
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <h1 id="stage-2-title" style="margin: 0;">Step 2: Package Details</h1>
+                        <div id="type-badge" class="tag" style="background: var(--accent); padding: 4px 12px; font-size: 0.9rem; font-weight: normal;">Detected: Application</div>
                     </div>
-                    <div class="form-group">
-                        <label>App Name <span style="color:var(--error)">*</span></label>
-                        <input type="text" id="name" required placeholder="Display name">
-                    </div>
+                    <p id="stage-2-subtitle" style="margin: 0;">Verify the information and upload icons/screenshots.</p>
                 </div>
+            </div>
 
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>App Version <span style="color:var(--error)">*</span></label>
-                        <input type="text" id="version" value="1.0.0" required placeholder="e.g. 1.0.0">
-                    </div>
-                    <div class="form-group">
-                        <label>Min. OS Version <span style="color:var(--error)">*</span></label>
-                        <input type="text" id="minOSVersion" value="1.0.0" required>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Author <span style="color:var(--error)">*</span></label>
-                    <input type="text" id="author" required placeholder="Developer name">
-                </div>
-
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="description" rows="3" placeholder="Tell users what your app does..."></textarea>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Entry Point (File) <span style="color:var(--error)">*</span></label>
-                        <input type="text" id="entryPoint" value="Program.cs" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Entry Class <span style="color:var(--error)">*</span></label>
-                        <input type="text" id="entryClass" required placeholder="Namespace.ClassName">
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label>Entry Method <span style="color:var(--error)">*</span></label>
-                        <input type="text" id="entryMethod" value="Main" required>
-                    </div>
-                    <div class="form-group" style="display: flex; align-items: center; gap: 20px; height: 100%; margin-bottom: 0;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="singleInstance" checked style="width: 20px; height: 20px; margin: 0;">
-                            <label for="singleInstance" style="margin: 0; cursor: pointer;">Single Instance</label>
+            <form id="upload-form" novalidate>
+                <div class="form-content">
+                    <input type="hidden" id="extensionType" value="application">
+                    
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Internal ID <span style="color:var(--error)">*</span></label>
+                            <input type="text" id="appId" required placeholder="e.g. MySuperApp">
+                            <div id="id-status" class="id-status"></div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="terminalOnly" style="width: 20px; height: 20px; margin: 0;">
-                            <label for="terminalOnly" style="margin: 0; cursor: pointer;">Terminal App</label>
+                        <div class="form-group">
+                            <label>Display Name <span style="color:var(--error)">*</span></label>
+                            <input type="text" id="name" required placeholder="Display name">
                         </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label>App Icon (PNG) <span style="color:var(--error)">*</span></label>
-                    <div id="icon-drop-zone" class="small-drop-zone">
-                        Drop icon.png or click
-                        <div id="icon-preview" class="drop-zone-preview"></div>
+                    <div class="grid-2">
+                        <div class="form-group">
+                            <label>Package Version <span style="color:var(--error)">*</span></label>
+                            <input type="text" id="version" required placeholder="e.g. 1.0.0">
+                        </div>
+                        <div class="form-group">
+                            <label>Min. OS Version <span style="color:var(--error)">*</span></label>
+                            <input type="text" id="minOSVersion" value="1.0.0" required>
+                        </div>
                     </div>
-                    <input type="file" id="icon-file" accept="image/png" required style="display: none;">
-                </div>
 
-                <div class="form-group">
-                    <label>Permissions (Comma separated, e.g. INTERNET, FILESYSTEM)</label>
-                    <input type="text" id="permissions" placeholder="NONE">
-                </div>
-
-                <div class="form-group dependency-selector">
-                    <label>Dependencies</label>
-                    <input type="text" id="dep-search" placeholder="Search other apps to add as dependencies...">
-                    <div id="dep-results" class="dependency-results"></div>
-                    <div id="selected-deps" class="dependency-tags"></div>
-                </div>
-
-                <div class="form-group">
-                    <label>References (Read-only from manifest)</label>
-                    <div id="references-display" class="references-display">No references found.</div>
-                </div>
-
-                <div class="form-group">
-                    <label>Screenshots</label>
-                    <div id="screenshots-drop-zone" class="small-drop-zone">
-                        Drop multiple screenshots or click
-                        <div id="screenshots-preview" class="drop-zone-preview"></div>
+                    <div class="form-group">
+                        <label>Author <span style="color:var(--error)">*</span></label>
+                        <input type="text" id="author" required placeholder="Developer name">
                     </div>
-                    <input type="file" id="screenshot-files" accept="image/*" multiple style="display: none;">
-                </div>
 
-                <div class="form-group">
-                    <label>Source Files (Drag & Drop or click to select) <span style="color:var(--error)">*</span></label>
-                    <div id="drop-zone" class="drop-zone">
-                        Drag and drop your application folder here<br>
-                        <span style="font-size: 0.8rem; opacity: 0.6;">(or click to browse)</span>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="description" rows="3" placeholder="Description of your content..."></textarea>
                     </div>
-                    <input type="file" id="source-input" webkitdirectory directory multiple required style="display: none;">
-                    <div id="file-list" class="file-list"></div>
+
+                    <!-- Application Specific Fields -->
+                    <div id="app-fields">
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Entry Point (File) <span style="color:var(--error)">*</span></label>
+                                <input type="text" id="entryPoint" value="Program.cs">
+                            </div>
+                            <div class="form-group">
+                                <label>Entry Class <span style="color:var(--error)">*</span></label>
+                                <input type="text" id="entryClass" placeholder="Namespace.ClassName">
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Entry Method <span style="color:var(--error)">*</span></label>
+                                <input type="text" id="entryMethod" value="Main">
+                            </div>
+                            <div class="form-group" style="display: flex; align-items: center; gap: 20px; height: 100%; margin-bottom: 0;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="singleInstance" checked style="width: 20px; height: 20px; margin: 0;">
+                                    <label for="singleInstance" style="margin: 0; cursor: pointer;">Single Instance</label>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="terminalOnly" style="width: 20px; height: 20px; margin: 0;">
+                                    <label for="terminalOnly" style="margin: 0; cursor: pointer;">Terminal App</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget Specific Fields -->
+                    <div id="widget-fields" style="display: none;">
+                        <div class="form-group">
+                            <label>Widget Class <span style="color:var(--error)">*</span></label>
+                            <input type="text" id="widgetClass" placeholder="Namespace.WidgetClassName">
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Default Size (W x H) <span style="color:var(--error)">*</span></label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="number" id="width" placeholder="Width" value="200">
+                                    <input type="number" id="height" placeholder="Height" value="200">
+                                </div>
+                            </div>
+                            <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 0; height: 100%;">
+                                <input type="checkbox" id="isResizable" style="width: 20px; height: 20px; margin: 0;">
+                                <label for="isResizable" style="margin: 0; cursor: pointer;">Resizable Widget</label>
+                            </div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label>Refresh Policy</label>
+                                <select id="refreshPolicy">
+                                    <option value="Interval">Interval</option>
+                                    <option value="OnEvent">OnEvent</option>
+                                </select>
+                            </div>
+                            <div id="interval-group" class="form-group">
+                                <label>Interval (ms)</label>
+                                <input type="number" id="intervalMs" value="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Subscriptions (Comma separated events)</label>
+                            <input type="text" id="subscriptions" placeholder="e.g. SYSTEM_TIME, BATTERY_LOW">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Icon (PNG) <span style="color:var(--error)">*</span></label>
+                        <div id="icon-drop-zone" class="small-drop-zone">
+                            Drop icon.png or click
+                            <div id="icon-preview" class="drop-zone-preview"></div>
+                        </div>
+                        <input type="file" id="icon-file" accept="image/png" style="display: none;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Permissions (Comma separated)</label>
+                        <input type="text" id="permissions" placeholder="NONE">
+                    </div>
+
+                    <div class="form-group dependency-selector">
+                        <label>Dependencies (Store Apps)</label>
+                        <input type="text" id="dep-search" placeholder="Search other apps to add as dependencies...">
+                        <div id="dep-results" class="dependency-results"></div>
+                        <div id="selected-deps" class="dependency-tags"></div>
+                    </div>
+
+                    <div id="references-section" class="form-group hidden">
+                        <label>Library References (Read-only from manifest)</label>
+                        <div id="references-list" style="display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 6px; min-height: 40px;">
+                            <!-- Populated from manifest -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Screenshots</label>
+                        <div id="screenshots-drop-zone" class="small-drop-zone">
+                            Drop multiple screenshots or click
+                            <div id="screenshots-preview" class="drop-zone-preview"></div>
+                        </div>
+                        <input type="file" id="screenshot-files" accept="image/*" multiple style="display: none;">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Source Files (Package Folder) <span style="color:var(--error)">*</span></label>
+                        <div id="drop-zone" class="drop-zone">
+                            Drag and drop your package folder here<br>
+                            <span style="font-size: 0.8rem; opacity: 0.6;">(or click to browse)</span>
+                        </div>
+                        <input type="file" id="source-input" webkitdirectory directory multiple style="display: none;">
+                        <div id="file-list" class="file-list"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>GitHub Token <span style="color:var(--error)">*</span></label>
+                        <input type="password" id="github-token" placeholder="ghp_..." required>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label>GitHub Token (Write access to store repo)</label>
-                    <input type="password" id="github-token" placeholder="ghp_..." required>
+                <div class="form-footer">
+                    <hr style="border: 0; border-top: 1px solid var(--border); margin: 0 0 20px 0;">
+                    <div style="display: flex; gap: 15px;">
+                        <button type="button" id="back-to-stage-1" style="flex: 1; background: rgba(255,255,255,0.05);">Back</button>
+                        <button type="button" id="next-to-stage-3" style="flex: 2;">Review Summary</button>
+                    </div>
                 </div>
+            </form>
+        </div>
+
+        <!-- Stage 3: Summary & Preview -->
+        <div id="stage-3" class="upload-stage" style="display: none;">
+            <div class="form-header">
+                <h1>Step 3: Upload Summary</h1>
+                <p>Review everything before publishing to the store.</p>
+            </div>
+
+            <div class="form-content" id="summary-content">
+                <!-- Dynamically populated -->
             </div>
 
             <div class="form-footer">
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 0 0 20px 0;">
-                <button type="submit" id="submit-btn" style="width: 100%; height: 50px; font-size: 1.1rem;">Prepare & Upload Package</button>
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" id="back-to-stage-2" style="flex: 1; background: rgba(255,255,255,0.05);">Back</button>
+                    <button type="button" id="submit-btn" style="flex: 2;">Ready to Publish!</button>
+                </div>
             </div>
-        </form>
+        </div>
+    </div>
     </div>
 
     <div id="status-terminal" class="terminal">

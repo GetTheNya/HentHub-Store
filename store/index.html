@@ -47,6 +47,40 @@
             align-items: center;
             margin-top: 40px;
         }
+
+        /* Tab Animations */
+        .tab-content {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .tab-content.hidden {
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .tab-content.fade-out {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        .tab {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+        .tab.active::after {
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -63,21 +97,41 @@
                    style="width: 100%; padding: 15px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--text-main); font-size: 1.1rem;">
         </div>
 
-        <div id="standard-apps-section">
-            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 1.5rem;">📱</span> Standard Applications
-            </h2>
-            <div id="standard-app-list" class="app-grid" style="margin-bottom: 50px;">
-                <p>Loading applications...</p>
+        <div class="tabs" style="display: flex; gap: 30px; margin-bottom: 30px; border-bottom: 1px solid var(--border);">
+            <div id="tab-apps" class="tab active" style="cursor: pointer; padding: 10px 5px; font-weight: bold; color: var(--text-main);">
+                Applications
+            </div>
+            <div id="tab-widgets" class="tab" style="cursor: pointer; padding: 10px 5px; font-weight: bold; color: var(--text-dim);">
+                Widgets
             </div>
         </div>
 
-        <div id="terminal-apps-section">
-            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 1.5rem;"> 🖥️</span> Terminal Applications
+        <div id="apps-container" class="tab-content">
+            <div id="standard-apps-section">
+                <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 1.4rem;">
+                    <span style="font-size: 1.5rem;">📱</span> Standard Applications
+                </h2>
+                <div id="standard-app-list" class="app-grid" style="margin-bottom: 50px;">
+                    <p>Loading applications...</p>
+                </div>
+            </div>
+
+            <div id="terminal-apps-section">
+                <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 1.4rem;">
+                    <span style="font-size: 1.5rem;"> 🖥️</span> Terminal Applications
+                </h2>
+                <div id="terminal-app-list" class="app-grid">
+                    <p>Loading applications...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="widgets-container" class="tab-content hidden">
+            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-size: 1.4rem;">
+                <span style="font-size: 1.5rem;">🧩</span> Desktop Widgets
             </h2>
-            <div id="terminal-app-list" class="app-grid">
-                <p>Loading applications...</p>
+            <div id="widget-list" class="app-grid">
+                <p>Loading widgets...</p>
             </div>
         </div>
     </div>

@@ -86,6 +86,30 @@ app.post('/delete-app', (req, res) => {
     }
 });
 
+// Reset endpoint to clear all mock data
+app.post('/reset', (req, res) => {
+    try {
+        const dirs = ['packages', 'assets', 'manifests'];
+        dirs.forEach(d => {
+            const fullPath = path.join(STORE_ROOT, d);
+            if (fs.existsSync(fullPath)) {
+                fs.rmSync(fullPath, { recursive: true, force: true });
+            }
+            fs.mkdirSync(fullPath, { recursive: true });
+        });
+        
+        // Re-initialize manifest
+        const manifestPath = path.join(STORE_ROOT, 'manifests', 'store-manifest.json');
+        fs.writeFileSync(manifestPath, JSON.stringify({ apps: [], lastUpdated: "" }, null, 2));
+
+        console.log('[RESET] All mock data cleared.');
+        res.json({ success: true });
+    } catch (err) {
+        console.error(`[ERROR] Reset failed: ${err.message}`);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Serve Store Website
 const STORE_WEB_ROOT = path.join(__dirname, '..', 'store');
 app.use('/store', express.static(STORE_WEB_ROOT));
@@ -94,7 +118,7 @@ app.use('/store', express.static(STORE_WEB_ROOT));
 app.use('/', express.static(STORE_ROOT));
 
 app.listen(PORT, () => {
-    console.log(`🚀 HentHub Store Emulator running at http://localhost:${PORT}`);
+    console.log(`🚀 HentHub Store Emulator running at http://localhost:${PORT}/store`);
     console.log(`🌍 Access Store: http://localhost:${PORT}/store/upload.html`);
     console.log(`📂 Files land in: ${STORE_ROOT}`);
 });

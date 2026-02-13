@@ -1,9 +1,13 @@
 let allApps = [];
+let currentTab = 'apps';
 
 async function loadApps() {
-    const standardList = document.getElementById('standard-app-list');
-    const terminalList = document.getElementById('terminal-app-list');
     const searchInput = document.getElementById('store-search');
+    const tabApps = document.getElementById('tab-apps');
+    const tabWidgets = document.getElementById('tab-widgets');
+
+    tabApps.addEventListener('click', () => switchTab('apps'));
+    tabWidgets.addEventListener('click', () => switchTab('widgets'));
 
     try {
         let manifestUrl;
@@ -24,66 +28,123 @@ async function loadApps() {
 
         // Add search listener
         searchInput.addEventListener('input', () => {
-            const query = searchInput.value.toLowerCase();
-            const filtered = allApps.filter(app => 
-                app.name.toLowerCase().includes(query) || 
-                app.appId.toLowerCase().includes(query)
-            );
-            renderApps(filtered);
+            renderApps(allApps);
         });
         
     } catch (err) {
         console.error(err);
         const errorMsg = `<p style="color: var(--error)">Error loading store: ${err.message}</p>`;
-        if (standardList) standardList.innerHTML = errorMsg;
-        if (terminalList) terminalList.innerHTML = errorMsg;
+        const containers = ['standard-app-list', 'terminal-app-list', 'widget-list'];
+        containers.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = errorMsg;
+        });
     }
 }
 
+function switchTab(tab) {
+    if (currentTab === tab) return;
+
+    const oldContainer = currentTab === 'apps' ? document.getElementById('apps-container') : document.getElementById('widgets-container');
+    const newContainer = tab === 'apps' ? document.getElementById('apps-container') : document.getElementById('widgets-container');
+    
+    const tabApps = document.getElementById('tab-apps');
+    const tabWidgets = document.getElementById('tab-widgets');
+
+    // Start transition
+    oldContainer.classList.add('fade-out');
+
+    setTimeout(() => {
+        currentTab = tab;
+        
+        // Update tab decorations
+        if (tab === 'apps') {
+            tabApps.classList.add('active');
+            tabApps.style.color = 'var(--text-main)';
+            tabWidgets.classList.remove('active');
+            tabWidgets.style.color = 'var(--text-dim)';
+        } else {
+            tabWidgets.classList.add('active');
+            tabWidgets.style.color = 'var(--text-main)';
+            tabApps.classList.remove('active');
+            tabApps.style.color = 'var(--text-dim)';
+        }
+
+        // Toggle visibility
+        oldContainer.classList.add('hidden');
+        oldContainer.classList.remove('fade-out');
+        newContainer.classList.remove('hidden');
+        
+        renderApps(allApps);
+    }, 300);
+}
+
 function renderApps(apps) {
+    const query = document.getElementById('store-search').value.toLowerCase();
+    const filtered = apps.filter(app => 
+        app.name.toLowerCase().includes(query) || 
+        app.appId.toLowerCase().includes(query)
+    );
+
     const standardList = document.getElementById('standard-app-list');
     const terminalList = document.getElementById('terminal-app-list');
+    const widgetList = document.getElementById('widget-list');
+    
     const standardSection = document.getElementById('standard-apps-section');
     const terminalSection = document.getElementById('terminal-apps-section');
 
     standardList.innerHTML = '';
     terminalList.innerHTML = '';
+    widgetList.innerHTML = '';
 
-    const standardApps = apps.filter(app => !app.terminalOnly);
-    const terminalApps = apps.filter(app => app.terminalOnly);
+    if (currentTab === 'apps') {
+        const standardApps = filtered.filter(app => (app.extensionType === 'application' || !app.extensionType) && !app.terminalOnly);
+        const terminalApps = filtered.filter(app => (app.extensionType === 'application' || !app.extensionType) && app.terminalOnly);
 
-    // Toggle section visibility
-    standardSection.style.display = standardApps.length > 0 ? 'block' : 'none';
-    terminalSection.style.display = terminalApps.length > 0 ? 'block' : 'none';
+        standardSection.style.display = standardApps.length > 0 ? 'block' : 'none';
+        terminalSection.style.display = terminalApps.length > 0 ? 'block' : 'none';
 
-    if (apps.length === 0) {
-        standardSection.style.display = 'block';
-        standardList.innerHTML = '<p>No applications match your search.</p>';
-        return;
+        if (standardApps.length === 0 && terminalApps.length === 0) {
+            standardList.innerHTML = '<p>No applications match your search.</p>';
+            standardSection.style.display = 'block';
+        } else {
+            standardApps.forEach(app => standardList.appendChild(createAppCard(app)));
+            terminalApps.forEach(app => terminalList.appendChild(createAppCard(app)));
+        }
+    } else {
+        const widgets = filtered.filter(app => app.extensionType === 'widget');
+        
+        if (widgets.length === 0) {
+            widgetList.innerHTML = '<p>No widgets match your search.</p>';
+        } else {
+            widgets.forEach(app => widgetList.appendChild(createAppCard(app)));
+        }
     }
-
-    standardApps.forEach(app => standardList.appendChild(createAppCard(app)));
-    terminalApps.forEach(app => terminalList.appendChild(createAppCard(app)));
 }
 
 function createAppCard(app) {
     const card = document.createElement('div');
     card.className = 'app-card';
     
+    // Determine type-specific prefix for assets
+    const type = app.extensionType || 'application';
+    const typePrefix = type === 'widget' ? 'widgets/' : 'application/';
+    
     let iconUrl = app.iconUrl;
     if (!iconUrl) {
         if (CONFIG.mode === 'GITHUB') {
-            iconUrl = `assets/icons/${app.appId.toLowerCase()}.png`;
+            iconUrl = `assets/icons/${typePrefix}${app.appId.toLowerCase()}.png`;
         } else {
-            iconUrl = `${CONFIG.localUrl}/assets/icons/${app.appId.toLowerCase()}.png`;
+            iconUrl = `${CONFIG.localUrl}/assets/icons/${typePrefix}${app.appId.toLowerCase()}.png`;
         }
     }
     
     card.innerHTML = `
-        <img src="${iconUrl}" class="app-icon" alt="${app.name}">
+        <img src="${iconUrl}" class="app-icon" alt="${app.name}" onerror="this.src='favicon.png'">
         <div class="app-title">
             ${app.name}
             ${app.terminalOnly ? '<span class="badge badge-terminal">Terminal</span>' : ''}
+            ${type === 'widget' ? '<span class="badge" style="background:var(--accent); font-size: 0.7rem; vertical-align: middle; margin-left: 5px; padding: 2px 6px; border-radius: 4px;">Widget</span>' : ''}
         </div>
         <div class="meta-tags" style="justify-content: center;">
             <span class="meta-tag meta-tag-author">by <b>${app.author}</b></span>

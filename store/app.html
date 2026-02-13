@@ -102,17 +102,33 @@
             }
 
             try {
-                const manifestUrl = CONFIG.mode === 'GITHUB'
+                const storeManifestUrl = CONFIG.mode === 'GITHUB'
                     ? 'manifests/store-manifest.json'
                     : `${CONFIG.localUrl}/manifests/store-manifest.json`;
 
-                const res = await fetch(manifestUrl);
-                const data = await res.json();
-                const app = data.apps.find(a => a.appId === appId);
+                const storeRes = await fetch(storeManifestUrl);
+                const storeData = await storeRes.json();
+                let app = storeData.apps.find(a => a.appId === appId);
 
                 if (!app) {
                     container.innerHTML = '<p>Error: App not found.</p>';
                     return;
+                }
+
+                // Fetch full manifest if needed (details page needs more info like dependencies/references)
+                try {
+                    const subfolder = app.extensionType === 'widget' ? 'widgets' : 'application';
+                    const individualUrl = CONFIG.mode === 'GITHUB'
+                        ? `manifests/${subfolder}/${appId.toLowerCase()}.json`
+                        : `${CONFIG.localUrl}/manifests/${subfolder}/${appId.toLowerCase()}.json`;
+                    
+                    const individualRes = await fetch(individualUrl);
+                    if (individualRes.ok) {
+                        const fullManifest = await individualRes.json();
+                        app = { ...app, ...fullManifest };
+                    }
+                } catch (err) {
+                    console.warn('Could not fetch full manifest, using store metadata fallback:', err);
                 }
 
                 document.title = `${app.name} - HentHub Store`;

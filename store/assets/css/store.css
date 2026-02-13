@@ -85,11 +85,17 @@ label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-
 input[type="text"], input[type="password"], textarea, select {
     width: 100%;
     padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text-main);
     box-sizing: border-box;
+    font-size: 1rem;
+}
+
+select option {
+    background-color: var(--card-bg);
+    color: var(--text-main);
 }
 input:focus { outline: none; border-color: var(--accent); }
 
