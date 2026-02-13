@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-02-11T20:28:01.260Z",
+  "lastUpdated": "2026-02-13T15:42:16.410Z",
   "apps": [
     {
       "appId": "NACHOS",
@@ -68,14 +68,15 @@
       "name": "Terminal",
       "version": "1.0.0",
       "author": "GetTheNya",
-      "description": "he ultimate power tool. Control every aspect of HentOS via text commands. Scripting, file management, and system diagnostics included. Handle with care.",
+      "description": "The ultimate power tool. Control every aspect of HentOS via text commands. Scripting, file management, and system diagnostics included. Handle with care.",
       "terminalOnly": false,
       "singleInstance": false,
+      "minOSVersion": "1.0.0",
       "permissions": [],
       "entryPoint": "Program.cs",
       "entryClass": "TerminalApp.Program",
       "entryMethod": "CreateWindow",
-      "size": 65667,
+      "size": 65723,
       "icon": "terminal.png",
       "screenshotCount": 1,
       "dependencies": [],
@@ -84,7 +85,7 @@
       ],
       "downloadUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/packages/terminal-v1.0.0.hub",
       "iconUrl": "https://github.com/GetTheNya/HentHub-Store/raw/main/store/assets/icons/terminal.png",
-      "publishedDate": "2026-02-11T19:53:57.726Z"
+      "publishedDate": "2026-02-13T15:42:16.409Z"
     },
     {
       "appId": "HORIZON",
