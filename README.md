@@ -162,4 +162,10 @@ If you are running the store via `file://` protocol (doubly clicking `index.html
 
 ---
 
+## 📄 License
+
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+Third-party software used in this project is listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 *Part of the HentOS Ecosystem.*
