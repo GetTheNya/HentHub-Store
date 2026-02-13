@@ -105,7 +105,7 @@ Every app in the store is defined by a JSON object in `store-manifest.json`.
   "description": "...",       // Short description
   "terminalOnly": false,      // true if it runs in Terminal
   "singleInstance": true,     // true if only one instance allowed
-  "minOSVersion": "v1.0.0",   // Minimum HentOS version required
+  "minOSVersion": "1.0.0",   // Minimum HentOS version required
   "entryPoint": "Program.cs", // Main script file
   "entryClass": "MyApp.Program", // Namespace.ClassName
   "entryMethod": "Main",      // Method to call

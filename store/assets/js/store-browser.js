@@ -87,7 +87,7 @@ function createAppCard(app) {
         </div>
         <div class="meta-tags" style="justify-content: center;">
             <span class="meta-tag meta-tag-author">by <b>${app.author}</b></span>
-            <span class="meta-tag meta-tag-os">Min OS: <b>${app.minOSVersion || 'v1.0.0'}</b></span>
+            <span class="meta-tag meta-tag-os">Min OS: <b>${app.minOSVersion || '1.0.0'}</b></span>
         </div>
         <div class="app-desc">${app.description || 'No description available.'}</div>
         <div class="meta-tags" style="justify-content: center; margin-bottom: 10px;">

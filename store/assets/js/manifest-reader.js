@@ -10,7 +10,8 @@ document.getElementById('manifest-input').addEventListener('change', function(e)
             // Map manifest fields to form inputs
             const fields = [
                 'appId', 'name', 'version', 'author', 
-                'description', 'entryPoint', 'entryClass', 'entryMethod'
+                'description', 'entryPoint', 'entryClass', 'entryMethod',
+                'minOSVersion'
             ];
 
             fields.forEach(field => {
