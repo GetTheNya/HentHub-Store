@@ -779,7 +779,7 @@ class HentHubUploader {
                 description: document.getElementById('description').value,
                 terminalOnly: this.terminalOnlyCheckbox.checked,
                 singleInstance: document.getElementById('singleInstance').checked,
-                minOSVersion: document.getElementById('minOSVersion').value || 'v1.0.0',
+                minOSVersion: document.getElementById('minOSVersion').value || '1.0.0',
                 permissions: permissions,
                 entryPoint: document.getElementById('entryPoint').value,
                 entryClass: document.getElementById('entryClass').value,
@@ -869,7 +869,7 @@ class HentHubUploader {
             entryMethod: document.getElementById('entryMethod').value,
             terminalOnly: this.terminalOnlyCheckbox.checked,
             singleInstance: document.getElementById('singleInstance').checked,
-            minOSVersion: document.getElementById('minOSVersion').value || 'v1.0.0',
+            minOSVersion: document.getElementById('minOSVersion').value || '1.0.0',
             permissions: permissions,
             icon: "icon.png", // Inside the package, it's always icon.png
             dependencies: Array.from(this.selectedDependencies),
