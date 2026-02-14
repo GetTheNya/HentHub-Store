@@ -83,7 +83,21 @@
       "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/application/horizon-v1.0.0.hub",
       "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/application/horizon.png",
       "publishedDate": "2026-02-14T13:02:27.921Z"
+    },
+    {
+      "appId": "CLOCK",
+      "name": "Digital Clock",
+      "extensionType": "widget",
+      "version": "1.1.0",
+      "author": "GetTheNya",
+      "description": "A simple desktop clock with date display.",
+      "minOSVersion": "1.1.0",
+      "terminalOnly": false,
+      "screenshotCount": 1,
+      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/widgets/clock-v1.1.0.hub",
+      "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/widgets/clock.png",
+      "publishedDate": "2026-02-14T13:15:33.243Z"
     }
   ],
-  "lastUpdated": "2026-02-14T13:02:27.921Z"
+  "lastUpdated": "2026-02-14T13:15:33.243Z"
 }
