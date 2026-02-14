@@ -524,9 +524,15 @@ class HentHubUploader {
                 this.sourceInput.files = dt.files;
                 this.updateFileList();
 
-                // If a manifest is found in the source files, update the form but don't jump stages automatically
-                const manifestFile = files.find(f => f.name.toLowerCase() === 'manifest.json');
+                // If a manifest is found in the source files, prioritize one at the root
+                const manifestFile = files.find(f => {
+                    const path = (f.webkitRelativePath || f.name).toLowerCase().replace(/\\/g, '/');
+                    const isRoot = !path.includes('/') || path.split('/').length <= 2;
+                    return f.name.toLowerCase() === 'manifest.json' && isRoot;
+                }) || files.find(f => f.name.toLowerCase() === 'manifest.json');
+
                 if (manifestFile) {
+                    this.log(`Detected manifest in dropped files: ${manifestFile.webkitRelativePath || manifestFile.name}`, 'info');
                     this.readManifestFile(manifestFile, false); 
                 }
             }
@@ -660,6 +666,10 @@ class HentHubUploader {
 
                 if (manifest.icon) {
                     this.lastManifestIcon = manifest.icon;
+                    this.log(`Manifest icon set to: ${this.lastManifestIcon}`, 'info');
+                } else {
+                    this.log(`Manifest has no 'icon' field, defaulting to icon.png`, 'warning');
+                    this.lastManifestIcon = 'icon.png';
                 }
 
                 if (manifest.dependencies && Array.isArray(manifest.dependencies)) {
@@ -855,17 +865,18 @@ class HentHubUploader {
             const currentVersion = document.getElementById('version').value.trim();
             
             if (hasNewFiles && currentVersion === this.initialVersion) {
-                errors.push('New version number (files updated)');
+                errors.push('New version number (Mandatory when files are updated)');
                 document.getElementById('version').classList.add('field-error');
-                this.log('Files updated - please increment the version number.', 'error');
+                this.log(`Files changed locally (v${currentVersion}). You MUST increment the version number to update the package on the store.`, 'error');
             }
         }
 
         // GitHub Token check (if mode is GITHUB)
-        const token = document.getElementById('github-token');
-        if (CONFIG.mode === 'GITHUB' && !token.value.trim()) {
-            errors.push('GitHub Token');
-            token.classList.add('field-error');
+        const tokenInput = document.getElementById('github-token');
+        if (CONFIG.mode === 'GITHUB' && !tokenInput.value.trim()) {
+            errors.push('GitHub Token (Missing or Invalid)');
+            tokenInput.classList.add('field-error');
+            this.log('GitHub Token is required for publishing. Enter your Personal Access Token in the footer.', 'error');
         }
 
         // Folder Validation: Check if manifest.json and the icon (from manifest) exist in the source folder
@@ -892,6 +903,7 @@ class HentHubUploader {
             if (!this.terminalOnlyCheckbox.checked) {
                 const manualIcon = document.getElementById('icon-file').files[0];
                 const expectedIconName = (this.lastManifestIcon || "icon.png").toLowerCase();
+                this.log(`Validating source folder: looking for icon '${expectedIconName}'...`, 'info');
                 
                 const iconMatch = files.find(f => {
                     const path = (f.webkitRelativePath || f.name).toLowerCase().replace(/\\/g, '/');
@@ -902,11 +914,14 @@ class HentHubUploader {
                 });
 
                 if (!iconMatch && !manualIcon) {
-                    errors.push(`App icon '${expectedIconName}' (missing from folder root and manual upload)`);
+                    errors.push(`App icon '${expectedIconName}' (Must match your manifest.json '"icon"' field)`);
                     this.dropZone.classList.add('field-error');
+                    this.log(`Error: File '${expectedIconName}' not found in folder root. If your icon is named differently, update the '"icon"' field in your manifest.json first.`, 'error');
                 } else if (manualIcon && manualIcon.name.toLowerCase() !== expectedIconName) {
                     errors.push(`Manual icon name '${manualIcon.name}' does not match manifest icon name '${expectedIconName}'`);
                     this.iconDropZone.classList.add('field-error');
+                } else if (iconMatch) {
+                    this.log(`Found icon: ${iconMatch.webkitRelativePath || iconMatch.name}`, 'success');
                 }
             }
         }
