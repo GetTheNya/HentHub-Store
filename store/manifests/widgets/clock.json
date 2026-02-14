@@ -2,7 +2,7 @@
   "appId": "CLOCK",
   "name": "Digital Clock",
   "extensionType": "widget",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "author": "GetTheNya",
   "description": "Stay in sync. A clean, minimalist widget to keep track of your runtime within the simulation.",
   "terminalOnly": false,
@@ -21,8 +21,8 @@
   "refreshPolicy": "Interval",
   "intervalMs": 1000,
   "subscriptions": [],
-  "size": 884,
-  "icon": "clock.png",
+  "size": 140682,
+  "icon": "icon.png",
   "screenshotCount": 1,
   "dependencies": [
     "DESKTOYS"
