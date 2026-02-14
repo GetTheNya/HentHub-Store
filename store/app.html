@@ -104,7 +104,7 @@
             try {
                 const storeManifestUrl = CONFIG.mode === 'GITHUB'
                     ? 'manifests/store-manifest.json'
-                    : `${CONFIG.localUrl}/manifests/store-manifest.json`;
+                    : `${CONFIG.localUrl}/store/manifests/store-manifest.json`;
 
                 const storeRes = await fetch(storeManifestUrl);
                 const storeData = await storeRes.json();
@@ -120,7 +120,7 @@
                     const subfolder = app.extensionType === 'widget' ? 'widgets' : 'application';
                     const individualUrl = CONFIG.mode === 'GITHUB'
                         ? `manifests/${subfolder}/${appId.toLowerCase()}.json`
-                        : `${CONFIG.localUrl}/manifests/${subfolder}/${appId.toLowerCase()}.json`;
+                        : `${CONFIG.localUrl}/store/manifests/${subfolder}/${appId.toLowerCase()}.json`;
                     
                     const individualRes = await fetch(individualUrl);
                     if (individualRes.ok) {
@@ -138,7 +138,7 @@
                     const subfolder = app.extensionType === 'widget' ? 'widgets' : 'application';
                     iconUrl = CONFIG.mode === 'GITHUB'
                         ? `assets/icons/${subfolder}/${app.appId.toLowerCase()}.png`
-                        : `${CONFIG.localUrl}/assets/icons/${subfolder}/${app.appId.toLowerCase()}.png`;
+                        : `${CONFIG.localUrl}/store/assets/icons/${subfolder}/${app.appId.toLowerCase()}.png`;
                 }
 
                 let screenshotsHtml = '';
@@ -149,7 +149,7 @@
                     for (let i = 0; i < app.screenshotCount; i++) {
                         const ssUrl = CONFIG.mode === 'GITHUB'
                             ? `assets/screenshots/${subfolder}/${app.appId.toLowerCase()}/${i}.png`
-                            : `${CONFIG.localUrl}/assets/screenshots/${subfolder}/${app.appId.toLowerCase()}/${i}.png`;
+                            : `${CONFIG.localUrl}/store/assets/screenshots/${subfolder}/${app.appId.toLowerCase()}/${i}.png`;
                         screenshotsHtml += `<img src="${ssUrl}" alt="Screenshot ${i}">`;
                     }
                     screenshotsHtml += '</div>';

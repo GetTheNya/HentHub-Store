@@ -14,7 +14,7 @@ async function loadApps() {
         if (CONFIG.mode === 'GITHUB') {
             manifestUrl = 'manifests/store-manifest.json';
         } else {
-            manifestUrl = `${CONFIG.localUrl}/manifests/store-manifest.json`;
+            manifestUrl = `${CONFIG.localUrl}/store/manifests/store-manifest.json`;
         }
         
         console.log(`Fetching manifest from: ${manifestUrl}`);
@@ -135,7 +135,7 @@ function createAppCard(app) {
         if (CONFIG.mode === 'GITHUB') {
             iconUrl = `assets/icons/${typePrefix}${app.appId.toLowerCase()}.png`;
         } else {
-            iconUrl = `${CONFIG.localUrl}/assets/icons/${typePrefix}${app.appId.toLowerCase()}.png`;
+            iconUrl = `${CONFIG.localUrl}/store/assets/icons/${typePrefix}${app.appId.toLowerCase()}.png`;
         }
     }
     

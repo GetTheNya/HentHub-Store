@@ -109,9 +109,10 @@ class HentHubUploader {
 
     async fetchStoreManifest() {
         try {
+            // UI is already in /store, so relative path is manifests/
             const url = CONFIG.mode === 'GITHUB' 
-                ? `https://${CONFIG.repoOwner}.github.io/${CONFIG.repoName}/manifests/store-manifest.json`
-                : `${CONFIG.localUrl}/manifests/store-manifest.json`;
+                ? 'manifests/store-manifest.json'
+                : `${CONFIG.localUrl}/store/manifests/store-manifest.json`;
             
             const res = await fetch(url);
             if (res.ok) {
@@ -142,7 +143,7 @@ class HentHubUploader {
                 const subfolder = app.extensionType === 'widget' ? 'widgets' : 'application';
                 const url = CONFIG.mode === 'GITHUB'
                     ? `manifests/${subfolder}/${appId.toLowerCase()}.json`
-                    : `${CONFIG.localUrl}/manifests/${subfolder}/${appId.toLowerCase()}.json`;
+                    : `${CONFIG.localUrl}/store/manifests/${subfolder}/${appId.toLowerCase()}.json`;
                 
                 const res = await fetch(url);
                 if (res.ok) {
@@ -1022,9 +1023,9 @@ class HentHubUploader {
             const subfolder = type === 'widget' ? 'widgets' : 'application';
             const fileName = `${appId.toLowerCase()}-v${version}.hub`;
             
-            // Paths relative to root (Emulator or Repo)
-            const packagePath = `packages/${subfolder}/${fileName}`;
-            const iconPath = `assets/icons/${subfolder}/${appId.toLowerCase()}.png`;
+            // Paths relative to Store root
+            const packagePath = `store/packages/${subfolder}/${fileName}`;
+            const iconPath = `store/assets/icons/${subfolder}/${appId.toLowerCase()}.png`;
 
             const iconFile = document.getElementById('icon-file').files[0];
             let iconBase64;
@@ -1261,7 +1262,7 @@ class HentHubUploader {
 
         // 3. Save FULL individual manifest
         const subfolder = metadata.extensionType === 'widget' ? 'widgets' : 'application';
-        const individualManifestPath = `manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
+        const individualManifestPath = `store/manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
         this.log(`Saving individual manifest: ${individualManifestPath}...`);
         await fetch(`${CONFIG.localUrl}/update-manifest`, {
             method: 'POST',
@@ -1271,7 +1272,7 @@ class HentHubUploader {
 
         // 4. Update browsing manifest (SLIM)
         this.log('Updating local store manifest (slim)...');
-        const manifestPath = 'manifests/store-manifest.json';
+        const manifestPath = 'store/manifests/store-manifest.json';
         let manifestData = { apps: [] };
         try {
             const res = await fetch(`${CONFIG.localUrl}/${manifestPath}`);
@@ -1358,7 +1359,7 @@ class HentHubUploader {
 
         // 5. Update browsing manifest (SLIM)
         this.log('Updating GitHub store manifest (slim)...');
-        const manifestPath = 'manifests/store-manifest.json';
+        const manifestPath = 'store/manifests/store-manifest.json';
         const manifestSha = await getSha(manifestPath);
         let manifestData = { apps: [] };
         
@@ -1379,8 +1380,8 @@ class HentHubUploader {
             minOSVersion: metadata.minOSVersion,
             terminalOnly: metadata.terminalOnly,
             screenshotCount: metadata.screenshotCount,
-            downloadUrl: `https://${owner}.github.io/${repo}/packages/${subfolder}/${appId.toLowerCase()}-v${version}.hub`,
-            iconUrl: `https://${owner}.github.io/${repo}/assets/icons/${subfolder}/${appId.toLowerCase()}.png`,
+            downloadUrl: `https://${owner}.github.io/${repo}/store/packages/${subfolder}/${appId.toLowerCase()}-v${version}.hub`,
+            iconUrl: `https://${owner}.github.io/${repo}/store/assets/icons/${subfolder}/${appId.toLowerCase()}.png`,
             publishedDate: new Date().toISOString()
         };
 
@@ -1392,7 +1393,7 @@ class HentHubUploader {
         await githubPut(manifestPath, btoa(JSON.stringify(manifestData, null, 2)), `Update store manifest (slim): ${metadata.appId}`, manifestSha);
         
         // 6. Save FULL individual manifest
-        const individualManifestPath = `manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
+        const individualManifestPath = `store/manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
         this.log(`Pushing individual manifest to GitHub: ${individualManifestPath}...`);
         const individualSha = await getSha(individualManifestPath);
         await githubPut(individualManifestPath, btoa(JSON.stringify(metadata, null, 2)), `Save full manifest: ${metadata.appId}`, individualSha);
