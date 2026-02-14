@@ -1,0 +1,32 @@
+{
+  "appId": "CLOCK",
+  "name": "Digital Clock",
+  "extensionType": "widget",
+  "version": "1.1.0",
+  "author": "GetTheNya",
+  "description": "A simple desktop clock with date display.",
+  "terminalOnly": false,
+  "singleInstance": true,
+  "minOSVersion": "1.1.0",
+  "permissions": [],
+  "entryPoint": "Program.cs",
+  "entryClass": "",
+  "entryMethod": "Main",
+  "widgetClass": "ClockWidget",
+  "defaultSize": {
+    "width": 220,
+    "height": 100
+  },
+  "isResizable": false,
+  "refreshPolicy": "Interval",
+  "intervalMs": 1000,
+  "subscriptions": [],
+  "size": 304497,
+  "icon": "clock.png",
+  "screenshotCount": 1,
+  "dependencies": [],
+  "references": [
+    "FontStashSharp",
+    "FontStashSharp.MonoGame"
+  ]
+}
