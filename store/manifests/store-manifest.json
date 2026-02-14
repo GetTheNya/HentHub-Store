@@ -130,16 +130,16 @@
       "appId": "NOWPLAYING",
       "name": "Now Playing",
       "extensionType": "widget",
-      "version": "1.1.0",
+      "version": "1.1.2",
       "author": "GetTheNya",
       "description": "Stay in the flow. A sleek companion widget that syncs with NeonWave to display your current track in real-time.",
       "minOSVersion": "1.1.0",
       "terminalOnly": false,
       "screenshotCount": 2,
-      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/widgets/nowplaying-v1.1.0.hub",
+      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/widgets/nowplaying-v1.1.2.hub",
       "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/widgets/nowplaying.png",
-      "publishedDate": "2026-02-14T17:03:10.157Z"
+      "publishedDate": "2026-02-14T17:43:53.170Z"
     }
   ],
-  "lastUpdated": "2026-02-14T17:36:10.958Z"
+  "lastUpdated": "2026-02-14T17:43:53.170Z"
 }
