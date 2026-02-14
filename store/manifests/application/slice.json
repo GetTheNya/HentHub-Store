@@ -1,0 +1,31 @@
+{
+  "appId": "SLICE",
+  "name": "Screen Capture",
+  "extensionType": "application",
+  "version": "1.0.0",
+  "author": "GetTheNya",
+  "description": "Precision screen capture. Cut a piece of reality and save it forever.",
+  "terminalOnly": false,
+  "singleInstance": true,
+  "minOSVersion": "1.0.0",
+  "permissions": [],
+  "entryPoint": "Program.cs",
+  "entryClass": "ScreenCapture.Program",
+  "entryMethod": "Main",
+  "widgetClass": "",
+  "defaultSize": {
+    "width": 200,
+    "height": 200
+  },
+  "isResizable": false,
+  "refreshPolicy": "Interval",
+  "intervalMs": 0,
+  "subscriptions": [],
+  "size": 378910,
+  "icon": "slice.png",
+  "screenshotCount": 1,
+  "dependencies": [],
+  "references": [
+    "FontStashSharp"
+  ]
+}
