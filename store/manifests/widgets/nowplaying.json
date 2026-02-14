@@ -23,10 +23,13 @@
   "subscriptions": [
     "NeonWave.Playback"
   ],
-  "size": 260460,
+  "size": 959,
   "icon": "nowplaying.png",
   "screenshotCount": 2,
-  "dependencies": [],
+  "dependencies": [
+    "DESKTOYS",
+    "NEONWAVE"
+  ],
   "references": [
     "FontStashSharp",
     "FontStashSharp.MonoGame"
