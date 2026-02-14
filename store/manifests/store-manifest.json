@@ -69,7 +69,21 @@
       "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/application/slice-v1.0.0.hub",
       "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/application/slice.png",
       "publishedDate": "2026-02-14T13:00:45.796Z"
+    },
+    {
+      "appId": "HORIZON",
+      "name": "Horizon Web Browser",
+      "extensionType": "application",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "Expand your horizons. A fully integrated, Chromium-powered gateway to the World Wide Web. Fast, fluid, and limitless.",
+      "minOSVersion": "1.0.0",
+      "terminalOnly": false,
+      "screenshotCount": 1,
+      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/application/horizon-v1.0.0.hub",
+      "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/application/horizon.png",
+      "publishedDate": "2026-02-14T13:02:27.921Z"
     }
   ],
-  "lastUpdated": "2026-02-14T13:00:45.796Z"
+  "lastUpdated": "2026-02-14T13:02:27.921Z"
 }
