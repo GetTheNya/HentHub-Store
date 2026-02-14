@@ -1,0 +1,31 @@
+{
+  "appId": "TERMINAL",
+  "name": "Terminal",
+  "extensionType": "application",
+  "version": "1.0.0",
+  "author": "GetTheNya",
+  "description": "The ultimate power tool. Control every aspect of HentOS via text commands. Scripting, file management, and system diagnostics included. Handle with care.",
+  "terminalOnly": false,
+  "singleInstance": false,
+  "minOSVersion": "1.0.0",
+  "permissions": [],
+  "entryPoint": "Program.cs",
+  "entryClass": "TerminalApp.Program",
+  "entryMethod": "CreateWindow",
+  "widgetClass": "",
+  "defaultSize": {
+    "width": 200,
+    "height": 200
+  },
+  "isResizable": false,
+  "refreshPolicy": "Interval",
+  "intervalMs": 0,
+  "subscriptions": [],
+  "size": 66147,
+  "icon": "terminal.png",
+  "screenshotCount": 1,
+  "dependencies": [],
+  "references": [
+    "FontStashSharp"
+  ]
+}
