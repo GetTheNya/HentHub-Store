@@ -90,14 +90,14 @@
       "extensionType": "widget",
       "version": "1.1.0",
       "author": "GetTheNya",
-      "description": "A simple desktop clock with date display.",
+      "description": "Stay in sync. A clean, minimalist widget to keep track of your runtime within the simulation.",
       "minOSVersion": "1.1.0",
       "terminalOnly": false,
       "screenshotCount": 1,
       "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/widgets/clock-v1.1.0.hub",
       "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/widgets/clock.png",
-      "publishedDate": "2026-02-14T13:15:33.243Z"
+      "publishedDate": "2026-02-14T13:20:56.338Z"
     }
   ],
-  "lastUpdated": "2026-02-14T13:15:33.243Z"
+  "lastUpdated": "2026-02-14T13:20:56.338Z"
 }
