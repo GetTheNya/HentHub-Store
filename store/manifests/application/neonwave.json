@@ -1,0 +1,31 @@
+{
+  "appId": "NEONWAVE",
+  "name": "NeonWave",
+  "extensionType": "application",
+  "version": "1.1.0",
+  "author": "GetTheNya",
+  "description": "Experience audio visually. NeonWave transforms your library into a living, breathing light show.",
+  "terminalOnly": false,
+  "singleInstance": true,
+  "minOSVersion": "1.1.0",
+  "permissions": [],
+  "entryPoint": "Program.cs",
+  "entryClass": "NeonWave.Program",
+  "entryMethod": "Main",
+  "widgetClass": "",
+  "defaultSize": {
+    "width": 200,
+    "height": 200
+  },
+  "isResizable": false,
+  "refreshPolicy": "Interval",
+  "intervalMs": 0,
+  "subscriptions": [],
+  "size": 894257,
+  "icon": "neonwave.png",
+  "screenshotCount": 1,
+  "dependencies": [],
+  "references": [
+    "FontStashSharp"
+  ]
+}
