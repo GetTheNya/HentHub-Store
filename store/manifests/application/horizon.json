@@ -1,0 +1,35 @@
+{
+  "appId": "HORIZON",
+  "name": "Horizon Web Browser",
+  "extensionType": "application",
+  "version": "1.0.0",
+  "author": "GetTheNya",
+  "description": "Expand your horizons. A fully integrated, Chromium-powered gateway to the World Wide Web. Fast, fluid, and limitless.",
+  "terminalOnly": false,
+  "singleInstance": true,
+  "minOSVersion": "1.0.0",
+  "permissions": [],
+  "entryPoint": "Program.cs",
+  "entryClass": "HorizonBrowser.Program",
+  "entryMethod": "Main",
+  "widgetClass": "",
+  "defaultSize": {
+    "width": 200,
+    "height": 200
+  },
+  "isResizable": false,
+  "refreshPolicy": "Interval",
+  "intervalMs": 0,
+  "subscriptions": [],
+  "size": 496318,
+  "icon": "horizon.png",
+  "screenshotCount": 1,
+  "dependencies": [],
+  "references": [
+    "FontStashSharp",
+    "CefSharp",
+    "CefSharp.Core",
+    "CefSharp.OffScreen",
+    "System.Private.Uri"
+  ]
+}
