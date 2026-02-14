@@ -88,15 +88,15 @@
       "appId": "CLOCK",
       "name": "Digital Clock",
       "extensionType": "widget",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": "GetTheNya",
       "description": "Stay in sync. A clean, minimalist widget to keep track of your runtime within the simulation.",
       "minOSVersion": "1.1.0",
       "terminalOnly": false,
       "screenshotCount": 1,
-      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/widgets/clock-v1.1.0.hub",
+      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/widgets/clock-v1.1.1.hub",
       "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/widgets/clock.png",
-      "publishedDate": "2026-02-14T16:51:53.061Z"
+      "publishedDate": "2026-02-14T17:02:22.639Z"
     },
     {
       "appId": "DESKTOYS",
@@ -141,5 +141,5 @@
       "publishedDate": "2026-02-14T14:57:51.969Z"
     }
   ],
-  "lastUpdated": "2026-02-14T16:51:53.061Z"
+  "lastUpdated": "2026-02-14T17:02:22.639Z"
 }
