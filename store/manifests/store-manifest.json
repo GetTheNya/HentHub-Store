@@ -41,7 +41,21 @@
       "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/application/nachos-v1.0.0.hub",
       "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/application/nachos.png",
       "publishedDate": "2026-02-14T12:56:20.347Z"
+    },
+    {
+      "appId": "NEOFETCH",
+      "name": "Neofetch Utility",
+      "extensionType": "application",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "I can't believe it's not Linux.",
+      "minOSVersion": "1.0.0",
+      "terminalOnly": true,
+      "screenshotCount": 1,
+      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/application/neofetch-v1.0.0.hub",
+      "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/application/neofetch.png",
+      "publishedDate": "2026-02-14T12:58:10.069Z"
     }
   ],
-  "lastUpdated": "2026-02-14T12:56:20.347Z"
+  "lastUpdated": "2026-02-14T12:58:10.069Z"
 }
