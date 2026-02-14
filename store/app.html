@@ -135,20 +135,21 @@
 
                 let iconUrl = app.iconUrl;
                 if (!iconUrl) {
+                    const subfolder = app.extensionType === 'widget' ? 'widgets' : 'application';
                     iconUrl = CONFIG.mode === 'GITHUB'
-                        ? `assets/icons/${app.appId.toLowerCase()}.png`
-                        : `${CONFIG.localUrl}/assets/icons/${app.appId.toLowerCase()}.png`;
+                        ? `assets/icons/${subfolder}/${app.appId.toLowerCase()}.png`
+                        : `${CONFIG.localUrl}/assets/icons/${subfolder}/${app.appId.toLowerCase()}.png`;
                 }
 
-                // For screenshots (this is a bit tricky if we don't know the count, in a real repo we'd use a folder list API or just guess 0.png, 1.png...)
-                // For now, let's assume we show a few or check if they exist via manifest if we updated it (I'll update the manifest to include screenshot count)
                 let screenshotsHtml = '';
+                const subfolder = app.extensionType === 'widget' ? 'widgets' : 'application';
+
                 if (app.screenshotCount > 0) {
                     screenshotsHtml = '<h2>Screenshots</h2><div class="screenshot-gallery">';
                     for (let i = 0; i < app.screenshotCount; i++) {
                         const ssUrl = CONFIG.mode === 'GITHUB'
-                            ? `assets/screenshots/${app.appId.toLowerCase()}/${i}.png`
-                            : `${CONFIG.localUrl}/assets/screenshots/${app.appId.toLowerCase()}/${i}.png`;
+                            ? `assets/screenshots/${subfolder}/${app.appId.toLowerCase()}/${i}.png`
+                            : `${CONFIG.localUrl}/assets/screenshots/${subfolder}/${app.appId.toLowerCase()}/${i}.png`;
                         screenshotsHtml += `<img src="${ssUrl}" alt="Screenshot ${i}">`;
                     }
                     screenshotsHtml += '</div>';
