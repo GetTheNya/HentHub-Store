@@ -1310,6 +1310,9 @@ class HentHubUploader {
     async uploadToGitHub(token, pkgPath, pkgContent, iconPath, iconContent, screenshots, metadata) {
         const owner = CONFIG.repoOwner;
         const repo = CONFIG.repoName;
+        const appId = metadata.appId;
+        const version = metadata.version;
+        const subfolder = metadata.extensionType === 'widget' ? 'widgets' : 'application';
         
         const githubPut = async (path, content, message, sha = null) => {
             const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
