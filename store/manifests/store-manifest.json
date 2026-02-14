@@ -1,2 +1,19 @@
 {
+  "apps": [
+    {
+      "appId": "TERMINAL",
+      "name": "Terminal",
+      "extensionType": "application",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "The ultimate power tool. Control every aspect of HentOS via text commands. Scripting, file management, and system diagnostics included. Handle with care.",
+      "minOSVersion": "1.0.0",
+      "terminalOnly": false,
+      "screenshotCount": 1,
+      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/store/packages/application/terminal-v1.0.0.hub",
+      "iconUrl": "https://GetTheNya.github.io/HentHub-Store/store/assets/icons/application/terminal.png",
+      "publishedDate": "2026-02-14T00:50:08.420Z"
+    }
+  ],
+  "lastUpdated": "2026-02-14T00:50:08.420Z"
 }
