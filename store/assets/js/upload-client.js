@@ -805,16 +805,28 @@ class HentHubUploader {
             }
         });
 
-        // Version enforcement in Edit Mode: Force version change if files are updated
+        // Version enforcement in Edit Mode
         if (this.isEditMode) {
             const hasNewFiles = (this.sourceInput.files && this.sourceInput.files.length > 0) || 
                                (this.iconInput.files && this.iconInput.files.length > 0);
             const currentVersion = document.getElementById('version').value.trim();
             
-            if (hasNewFiles && currentVersion === this.initialVersion) {
-                errors.push('New version number (Mandatory when files are updated)');
+            const cmp = this.compareVersions(currentVersion, this.initialVersion);
+            
+            if (hasNewFiles && cmp <= 0) {
+                const msg = cmp === 0 
+                    ? `Version v${currentVersion} is already on the store. You must increment it.` 
+                    : `Version v${currentVersion} is lower than the store version (v${this.initialVersion}).`;
+                errors.push(msg);
                 document.getElementById('version').classList.add('field-error');
-                this.log(`Files changed locally (v${currentVersion}). You MUST increment the version number to update the package on the store.`, 'error');
+                this.log(`Version Error: ${msg}`, 'error');
+            }
+
+            // NEW: If you increment the version, you MUST provide files
+            if (cmp > 0 && !hasNewFiles) {
+                errors.push('Source Files (Mandatory on version increment)');
+                this.dropZone.classList.add('field-error');
+                this.log(`Version increased to v${currentVersion}. You must drop the updated application folder to re-package the app.`, 'error');
             }
         }
 
@@ -968,6 +980,23 @@ class HentHubUploader {
         this.terminal.scrollTop = this.terminal.scrollHeight;
     }
 
+    compareVersions(v1, v2) {
+        if (!v1 || !v2) return 0;
+        // Strip 'v' and split by dots. Map to numbers, handle non-numeric as 0.
+        const clean = (v) => String(v).replace(/^v/i, '').split('.').map(n => parseInt(n) || 0);
+        const p1 = clean(v1);
+        const p2 = clean(v2);
+        
+        const len = Math.max(p1.length, p2.length);
+        for (let i = 0; i < len; i++) {
+            const n1 = p1[i] || 0;
+            const n2 = p2[i] || 0;
+            if (n1 > n2) return 1;
+            if (n1 < n2) return -1;
+        }
+        return 0;
+    }
+
     async handleSubmit(e) {
         e.preventDefault();
         
@@ -990,15 +1019,6 @@ class HentHubUploader {
             const token = document.getElementById('github-token').value;
             const version = document.getElementById('version').value;
             const screenshotFiles = document.getElementById('screenshot-files').files;
-            
-            this.log('Creating .hub package...', 'info');
-            const zipBlob = await this.createZip();
-            if (zipBlob) {
-                this.log(`.hub package created (${(zipBlob.size / 1024).toFixed(2)} KB)`, 'success');
-            } else {
-                this.log('No new files to package.', 'info');
-            }
-
             const type = this.extensionTypeInput.value;
             const subfolder = type === 'widget' ? 'widgets' : 'application';
             const fileName = `${appId.toLowerCase()}-v${version}.hub`;
@@ -1007,26 +1027,33 @@ class HentHubUploader {
             const packagePath = `packages/${subfolder}/${fileName}`;
             const iconPath = `assets/icons/${subfolder}/${appId.toLowerCase()}.png`;
 
+            // 1. Create ZIP Package
+            this.log('Creating .hub package...', 'info');
+            const zipBlob = await this.createZip();
+            
+            let pkgContent = null;
+            if (zipBlob) {
+                this.log(`.hub package created (${(zipBlob.size / 1024).toFixed(2)} KB)`, 'success');
+                pkgContent = await this.fileToBase64(new File([zipBlob], packagePath));
+            } else {
+                this.log('Skipping package upload (Metadata-only update or no changes).', 'info');
+            }
+
+            // 2. Handle Icon
             const iconFile = document.getElementById('icon-file').files[0];
-            let iconBase64;
+            let iconBase64 = null;
             
             if (iconFile) {
+                this.log('Processing new icon...', 'info');
                 iconBase64 = await this.fileToBase64(iconFile);
-            } else if (this.terminalOnlyCheckbox.checked) {
-                // Fetch the default terminal icon and convert to base64
+            } else if (this.terminalOnlyCheckbox.checked && !this.isEditMode) {
+                this.log('Using default terminal icon...', 'info');
                 const resp = await fetch(this.DEFAULT_TERMINAL_ICON_PATH);
                 const blob = await resp.blob();
                 iconBase64 = await this.fileToBase64(blob);
-            } else if (!this.isEditMode) {
-                throw new Error("Missing package icon.");
             }
 
-            let packageBase64 = null;
-            if (zipBlob) {
-                packageBase64 = await this.fileToBase64(zipBlob);
-            }
-
-            // Prepare Screenshots for upload
+            // 3. Prepare Screenshots
             const screenshots = [];
             for (let i = 0; i < screenshotFiles.length; i++) {
                 const content = await this.fileToBase64(screenshotFiles[i]);
@@ -1036,6 +1063,7 @@ class HentHubUploader {
                 });
             }
 
+            // 4. Update Metadata
             const pVal = document.getElementById('permissions').value;
             const permissions = pVal ? pVal.split(',').map(p => p.trim()).filter(p => p) : [];
 
@@ -1073,10 +1101,10 @@ class HentHubUploader {
             
             if (CONFIG.mode === 'GITHUB') {
                 this.log(`Uploading to GitHub: ${CONFIG.repoOwner}/${CONFIG.repoName}...`, 'info');
-                await this.uploadToGitHub(token, packagePath, packageBase64, iconPath, iconBase64, screenshots, appMetadata);
+                await this.uploadToGitHub(token, packagePath, pkgContent, iconPath, iconBase64, screenshots, appMetadata);
             } else {
                 this.log('Uploading to Local Emulator...', 'info');
-                await this.uploadToLocal(packagePath, packageBase64, iconPath, iconBase64, screenshots, appMetadata);
+                await this.uploadToLocal(packagePath, pkgContent, iconPath, iconBase64, screenshots, appMetadata);
             }
             
             this.log('Upload successful!', 'success');
@@ -1100,56 +1128,64 @@ class HentHubUploader {
     }
 
     async createZip() {
-        let zip = new JSZip();
         const sourceFiles = this.sourceInput.files;
         const iconFile = document.getElementById('icon-file').files[0];
         const screenshotFiles = document.getElementById('screenshot-files').files;
+        const currentVersion = document.getElementById('version').value.trim();
+        const appId = this.appIdInput.value.toUpperCase();
+        const type = this.extensionTypeInput.value;
+        const targetExt = type === 'widget' ? '.dtoy' : '.sapp';
+        const targetFolderName = `${appId.toLowerCase()}${targetExt}`;
+
+        // 1. Metadata-Only detection
+        if (this.isEditMode && sourceFiles.length === 0 && currentVersion === this.initialVersion) {
+            this.log('No source file changes detected. Skipping .hub regeneration.', 'info');
+            return null;
+        }
+
+        let zip = new JSZip();
         
-        let existingManifestData = null;
-
-        // --- Archive Patching Logic ---
+        // --- Archive Patching Logic (Metadata-only tweak on existing archive) ---
         if (sourceFiles.length === 0 && this.isEditMode && this.currentEditingAppData) {
-            this.log('Metadata-only update detected. Patching existing archive...', 'info');
+            this.log('Patching existing archive with new metadata...', 'info');
             try {
-                const appId = this.currentEditingAppData.appId.toLowerCase();
+                const appIdLower = this.currentEditingAppData.appId.toLowerCase();
                 const version = this.initialVersion;
-                const fileName = `${appId}-v${version}.hub`;
+                const fileName = `${appIdLower}-v${version}.hub`;
+                const subfolder = this.currentEditingAppData.extensionType === 'widget' ? 'widgets' : 'application';
                 const url = CONFIG.mode === 'GITHUB'
-                    ? `https://${CONFIG.repoOwner}.github.io/${CONFIG.repoName}/packages/${fileName}`
-                    : `${CONFIG.localUrl}/packages/${fileName}`;
+                    ? `https://${CONFIG.repoOwner}.github.io/${CONFIG.repoName}/packages/${subfolder}/${fileName}`
+                    : `${CONFIG.localUrl}/packages/${subfolder}/${fileName}`;
 
-                this.log(`Fetching existing archive for patching: ${fileName}`, 'info');
                 const resp = await fetch(url);
-                if (!resp.ok) throw new Error(`Could not fetch existing archive: ${resp.statusText}`);
-                
-                const arrayBuffer = await resp.arrayBuffer();
-                zip = await JSZip.loadAsync(arrayBuffer);
-                this.log('Existing archive loaded. Updating manifest...', 'success');
+                if (resp.ok) {
+                    const arrayBuffer = await resp.arrayBuffer();
+                    zip = await JSZip.loadAsync(arrayBuffer);
+                    this.log('Base archive loaded successfully.', 'success');
+                }
             } catch (err) {
-                this.log(`Archive patching failed: ${err.message}. Creating new partial archive.`, 'warning');
-                // Fallback to empty zip if patch fails
+                this.log(`Patching fallback: ${err.message}`, 'warning');
             }
         }
 
-        // 1. Determine Icon Filename (Strict priority: manual upload > manifest > fallback)
+        // Determine Icon Filename
         let finalIconName = this.lastManifestIcon || "icon.png";
-        if (iconFile) finalIconName = iconFile.name; // Manual upload overrides name
+        if (iconFile) finalIconName = iconFile.name;
         
         const pVal = document.getElementById('permissions').value;
         const permissions = pVal ? pVal.split(',').map(p => p.trim()).filter(p => p) : [];
 
         const manifest = {
-            appId: this.appIdInput.value.toUpperCase(),
-            ...(this.extensionTypeInput.value === 'widget' ? { id: this.appIdInput.value.toUpperCase() } : {}),
+            appId: appId,
+            ...(type === 'widget' ? { id: appId } : {}),
             name: document.getElementById('name').value,
-            extensionType: this.extensionTypeInput.value,
-            version: document.getElementById('version').value,
+            extensionType: type,
+            version: currentVersion,
             author: document.getElementById('author').value,
             description: document.getElementById('description').value,
             entryPoint: document.getElementById('entryPoint').value,
             entryClass: document.getElementById('entryClass').value,
             entryMethod: document.getElementById('entryMethod').value,
-            // Widget specific fields
             widgetClass: document.getElementById('widgetClass').value,
             defaultSize: {
                 width: parseFloat(document.getElementById('width').value),
@@ -1159,7 +1195,6 @@ class HentHubUploader {
             refreshPolicy: document.getElementById('refreshPolicy').value,
             intervalMs: parseInt(document.getElementById('intervalMs').value || 0),
             subscriptions: document.getElementById('subscriptions').value.split(',').map(s => s.trim()).filter(s => s),
-
             terminalOnly: this.terminalOnlyCheckbox.checked,
             singleInstance: document.getElementById('singleInstance').checked,
             minOSVersion: document.getElementById('minOSVersion').value || '1.0.0',
@@ -1169,30 +1204,61 @@ class HentHubUploader {
             references: window.currentManifestReferences || []
         };
         
-        // Write or add root manifest.json
         const syncedManifestContent = JSON.stringify(manifest, null, 2);
+
+        // --- SOURCE FILE PROCESSING WITH TARGET FOLDERING ---
+        if (sourceFiles.length > 0) {
+            let rootPrefix = "";
+            const manifestMatch = Array.from(sourceFiles).find(f => {
+                const n = f.name.toLowerCase();
+                const p = (f.webkitRelativePath || "").toLowerCase().replace(/\\/g, '/');
+                return n === 'manifest.json' && (p === 'manifest.json' || (p.split('/').length === 2 && p.endsWith('/manifest.json')));
+            });
+
+            if (manifestMatch && manifestMatch.webkitRelativePath) {
+                const parts = manifestMatch.webkitRelativePath.split('/');
+                if (parts.length > 1) {
+                    rootPrefix = parts.slice(0, parts.length - 1).join('/') + '/';
+                }
+            }
+
+            this.log(`Packaging files into ${targetFolderName}/ ...`, 'info');
+            const appFolder = zip.folder(targetFolderName);
+
+            for (let file of sourceFiles) {
+                let path = file.webkitRelativePath || file.name;
+                if (rootPrefix && path.startsWith(rootPrefix)) {
+                    path = path.substring(rootPrefix.length);
+                }
+                const normalizedPath = path.toLowerCase().replace(/\\/g, '/');
+                
+                // If it's the manifest, use our synced one instead of disk one
+                if (normalizedPath === 'manifest.json' || normalizedPath.endsWith('/manifest.json')) {
+                    appFolder.file(path, syncedManifestContent);
+                    continue;
+                }
+                appFolder.file(path, file);
+            }
+        }
+
+        // --- ROOT ASSETS ---
+        // 1. Root manifest.json
         zip.file("manifest.json", syncedManifestContent);
 
-        // --- Multi-Manifest Synchronization ---
-        // We ensure EVERY manifest.json in the package is updated to match.
-        // This handles cases where the zip already contains a nested manifest (e.g. In MyApp.sapp/manifest.json)
-        zip.forEach((relativePath, file) => {
-            if (relativePath.toLowerCase().endsWith('/manifest.json')) {
-                this.log(`Syncing internal manifest: ${relativePath}`, 'info');
-                zip.file(relativePath, syncedManifestContent);
-            }
-        });
-
-        // 2. Handle Icon (Using the manifest-dictated filename)
+        // 2. Root icon
         if (iconFile) {
             zip.file(finalIconName, iconFile);
         } else if (this.terminalOnlyCheckbox.checked && !this.isEditMode) {
-            // Only add default if NOT in edit mode or explicitly requested
             const resp = await fetch(this.DEFAULT_TERMINAL_ICON_PATH);
             const iconBlob = await resp.blob();
             zip.file(finalIconName, iconBlob);
+        } else if (this.isEditMode && !iconFile) {
+            // If patching and no new icon, icon should already be in zip if loaded correctly
+            // but for safety, we ensure manifest's icon is present if we found it in the source files
+            // (or it will stay there if patching)
         }
 
+        // 3. Root screenshots folder
         if (screenshotFiles.length > 0) {
             const ssFolder = zip.folder("screenshots");
             for (let i = 0; i < screenshotFiles.length; i++) {
@@ -1200,26 +1266,7 @@ class HentHubUploader {
             }
         }
 
-        if (sourceFiles.length > 0) {
-            for (let file of sourceFiles) {
-                const path = file.webkitRelativePath || file.name;
-                const normalizedPath = path.toLowerCase().replace(/\\/g, '/');
-                
-                // Root manifest is already handled
-                if (normalizedPath === 'manifest.json') continue;
-
-                // If it's a nested manifest, sync it
-                if (normalizedPath.endsWith('/manifest.json')) {
-                    zip.file(path, JSON.stringify(manifest, null, 2));
-                    continue;
-                }
-                
-                zip.file(path, file);
-            }
-        }
-
-        const zipBlob = await zip.generateAsync({ type: "blob" });
-        return zipBlob;
+        return await zip.generateAsync({ type: "blob" });
     }
 
     async uploadToLocal(pkgPath, pkgContent, iconPath, iconContent, screenshots, metadata) {
@@ -1240,7 +1287,6 @@ class HentHubUploader {
             await upload('store/' + ss.path, ss.content);
         }
 
-        // 3. Save FULL individual manifest
         const subfolder = metadata.extensionType === 'widget' ? 'widgets' : 'application';
         const individualManifestPath = `store/manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
         this.log(`Saving individual manifest: ${individualManifestPath}...`);
@@ -1250,7 +1296,6 @@ class HentHubUploader {
             body: JSON.stringify({ path: individualManifestPath, content: metadata })
         });
 
-        // 4. Update browsing manifest (SLIM)
         this.log('Updating local store manifest (slim)...');
         const manifestPath = 'store/manifests/store-manifest.json';
         let manifestData = { apps: [] };
@@ -1342,12 +1387,11 @@ class HentHubUploader {
 
         // 5. Update browsing manifest (SLIM)
         this.log('Updating GitHub store manifest (slim)...');
-        const manifestPath = 'manifests/store-manifest.json';
-        const storeManifestPath = 'store/' + manifestPath;
-        const manifestSha = await getSha(storeManifestPath);
+        const manifestPath = 'store/manifests/store-manifest.json';
+        const manifestSha = await getSha(manifestPath);
         let manifestData = { apps: [] };
         
-        const mRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${storeManifestPath}`, {
+        const mRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${manifestPath}`, {
             headers: { 'Authorization': `token ${token}` }
         });
         if (mRes.ok) {
@@ -1376,14 +1420,13 @@ class HentHubUploader {
         else manifestData.apps.push(slimEntry);
 
         manifestData.lastUpdated = new Date().toISOString();
-        await githubPut(storeManifestPath, btoa(JSON.stringify(manifestData, null, 2)), `Update store manifest (slim): ${metadata.appId}`, manifestSha);
+        await githubPut(manifestPath, btoa(JSON.stringify(manifestData, null, 2)), `Update store manifest (slim): ${metadata.appId}`, manifestSha);
         
         // 6. Save FULL individual manifest
-        const individualManifestPath = `manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
-        const storeIndividualPath = 'store/' + individualManifestPath;
-        this.log(`Pushing individual manifest to GitHub: ${storeIndividualPath}...`);
-        const individualSha = await getSha(storeIndividualPath);
-        await githubPut(storeIndividualPath, btoa(JSON.stringify(metadata, null, 2)), `Save full manifest: ${metadata.appId}`, individualSha);
+        const individualManifestPath = `store/manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
+        this.log(`Pushing individual manifest to GitHub: ${individualManifestPath}...`);
+        const individualSha = await getSha(individualManifestPath);
+        await githubPut(individualManifestPath, btoa(JSON.stringify(metadata, null, 2)), `Save full manifest: ${metadata.appId}`, individualSha);
     }
 
     async scanFilesRecursively(entries) {
