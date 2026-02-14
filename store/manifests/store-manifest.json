@@ -13,7 +13,21 @@
       "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/application/terminal-v1.0.0.hub",
       "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/application/terminal.png",
       "publishedDate": "2026-02-14T12:38:06.096Z"
+    },
+    {
+      "appId": "SAPPC",
+      "name": "SAPP Compiler",
+      "extensionType": "application",
+      "version": "1.0.0",
+      "author": "GetTheNya",
+      "description": "The backbone of the OS. SAPP Compiler translates high-level C# code into native HentOS applications in real-time. Fast, efficient, and integrated.",
+      "minOSVersion": "1.0.0",
+      "terminalOnly": true,
+      "screenshotCount": 0,
+      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/application/sappc-v1.0.0.hub",
+      "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/application/sappc.png",
+      "publishedDate": "2026-02-14T12:49:24.138Z"
     }
   ],
-  "lastUpdated": "2026-02-14T12:38:06.097Z"
+  "lastUpdated": "2026-02-14T12:49:24.138Z"
 }
