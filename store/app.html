@@ -279,7 +279,7 @@
 
                     const owner = CONFIG.repoOwner;
                     const repo = CONFIG.repoName;
-                    const manifestPath = 'manifests/store-manifest.json';
+                    const manifestPath = 'store/manifests/store-manifest.json';
                     const manifestUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${manifestPath}`;
 
                     showModal('Authenticating', 'Fetching manifest from GitHub...', 'attention');

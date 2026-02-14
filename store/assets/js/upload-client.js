@@ -722,6 +722,12 @@ class HentHubUploader {
             iconSrc = URL.createObjectURL(iconFile);
         } else if (this.terminalOnlyCheckbox.checked) {
             iconSrc = this.DEFAULT_TERMINAL_ICON_PATH;
+        } else if (this.isEditMode && this.currentEditingAppData) {
+            // Priority: Manual Upload > Terminal Default > Existing Store Icon
+            const subfolder = this.currentEditingAppData.extensionType === 'widget' ? 'widgets' : 'application';
+            iconSrc = CONFIG.mode === 'GITHUB'
+                ? `assets/icons/${subfolder}/${this.currentEditingAppData.appId.toLowerCase()}.png`
+                : `${CONFIG.localUrl}/store/assets/icons/${subfolder}/${this.currentEditingAppData.appId.toLowerCase()}.png`;
         }
 
         const screenshots = Array.from(this.screenshotsInput.files);
@@ -1085,7 +1091,7 @@ class HentHubUploader {
                 subscriptions: document.getElementById('subscriptions').value.split(',').map(s => s.trim()).filter(s => s),
                 
                 size: zipBlob ? zipBlob.size : (this.currentEditingAppData ? this.currentEditingAppData.size : 0),
-                icon: `${appId.toLowerCase()}.png`,
+                icon: this.lastManifestIcon || (iconFile ? iconFile.name : "icon.png"),
                 screenshotCount: screenshotFiles.length > 0 ? screenshotFiles.length : (this.currentEditingAppData ? this.currentEditingAppData.screenshotCount : 0),
                 dependencies: Array.from(this.selectedDependencies),
                 references: window.currentManifestReferences || []
@@ -1184,7 +1190,7 @@ class HentHubUploader {
             singleInstance: document.getElementById('singleInstance').checked,
             minOSVersion: document.getElementById('minOSVersion').value || '1.0.0',
             permissions: permissions,
-            icon: "icon.png", // Inside the package, it's always icon.png
+            icon: finalIconName, 
             dependencies: Array.from(this.selectedDependencies),
             references: window.currentManifestReferences || []
         };
@@ -1203,14 +1209,14 @@ class HentHubUploader {
             }
         });
 
-        // 2. Handle Icon (Standardize to icon.png inside Zip)
+        // 2. Handle Icon (Using the manifest-dictated filename)
         if (iconFile) {
-            zip.file("icon.png", iconFile);
+            zip.file(finalIconName, iconFile);
         } else if (this.terminalOnlyCheckbox.checked && !this.isEditMode) {
             // Only add default if NOT in edit mode or explicitly requested
             const resp = await fetch(this.DEFAULT_TERMINAL_ICON_PATH);
             const iconBlob = await resp.blob();
-            zip.file("icon.png", iconBlob);
+            zip.file(finalIconName, iconBlob);
         }
 
         if (screenshotFiles.length > 0) {
