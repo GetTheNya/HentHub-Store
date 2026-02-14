@@ -1,0 +1,34 @@
+{
+  "appId": "SAPPC",
+  "name": "SAPP Compiler",
+  "extensionType": "application",
+  "version": "1.0.0",
+  "author": "GetTheNya",
+  "description": "The backbone of the OS. SAPP Compiler translates high-level C# code into native HentOS applications in real-time. Fast, efficient, and integrated.",
+  "terminalOnly": true,
+  "singleInstance": false,
+  "minOSVersion": "1.0.0",
+  "permissions": [],
+  "entryPoint": "Program.cs",
+  "entryClass": "Compiler.Program",
+  "entryMethod": "Main",
+  "widgetClass": "",
+  "defaultSize": {
+    "width": 200,
+    "height": 200
+  },
+  "isResizable": false,
+  "refreshPolicy": "Interval",
+  "intervalMs": 0,
+  "subscriptions": [],
+  "size": 96692,
+  "icon": "sappc.png",
+  "screenshotCount": 0,
+  "dependencies": [
+    "TERMINAL"
+  ],
+  "references": [
+    "Microsoft.CodeAnalysis",
+    "Microsoft.CodeAnalysis.CSharp"
+  ]
+}
