@@ -1,0 +1,43 @@
+{
+  "appId": "NACHOS",
+  "name": "NACHOS IDE",
+  "extensionType": "application",
+  "version": "1.0.0",
+  "author": "GetTheNya",
+  "description": "The engine of creation. NACHOS provides a seamless environment to write, compile, and inject SAPP applications directly into the HentOS runtime.",
+  "terminalOnly": false,
+  "singleInstance": true,
+  "minOSVersion": "1.0.0",
+  "permissions": [],
+  "entryPoint": "Program.cs",
+  "entryClass": "NACHOS.Program",
+  "entryMethod": "Main",
+  "widgetClass": "",
+  "defaultSize": {
+    "width": 200,
+    "height": 200
+  },
+  "isResizable": false,
+  "refreshPolicy": "Interval",
+  "intervalMs": 0,
+  "subscriptions": [],
+  "size": 1514683,
+  "icon": "nachos.png",
+  "screenshotCount": 3,
+  "dependencies": [
+    "SAPPC"
+  ],
+  "references": [
+    "FontStashSharp.MonoGame",
+    "Microsoft.CodeAnalysis",
+    "Microsoft.CodeAnalysis.CSharp",
+    "System.Collections.Immutable",
+    "System.ComponentModel.TypeConverter",
+    "System.ComponentModel.Primitives",
+    "System.Text.Json",
+    "System.Memory",
+    "System.Runtime.Loader",
+    "System.Text.RegularExpressions",
+    "System.IO.FileSystem.Watcher"
+  ]
+}
