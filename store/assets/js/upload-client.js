@@ -1337,8 +1337,9 @@ class HentHubUploader {
         // Push .hub (Only if new files were selected)
         if (pkgContent) {
             this.log('Pushing .hub to GitHub...');
-            const hubSha = await getSha(pkgPath);
-            await githubPut(pkgPath, pkgContent, `Update ${metadata.appId} package (v${metadata.version})`, hubSha);
+            const hubPath = 'store/' + pkgPath;
+            const hubSha = await getSha(hubPath);
+            await githubPut(hubPath, pkgContent, `Update ${metadata.appId} package (v${metadata.version})`, hubSha);
         } else {
             this.log('Skipping package push (no new files).', 'info');
         }
@@ -1346,24 +1347,29 @@ class HentHubUploader {
         // Push Icon (Only if new icon was selected)
         if (iconContent) {
             this.log('Pushing Icon to GitHub...');
-            const iconSha = await getSha(iconPath);
-            await githubPut(iconPath, iconContent, `Update ${metadata.appId} icon`, iconSha);
+            const iconFullPath = 'store/' + iconPath;
+            const iconSha = await getSha(iconFullPath);
+            await githubPut(iconFullPath, iconContent, `Update ${metadata.appId} icon`, iconSha);
         }
 
         // Push Screenshots
         this.log('Pushing Screenshots to GitHub...');
         for (const ss of screenshots) {
-            const ssSha = await getSha(ss.path);
-            await githubPut(ss.path, ss.content, `Upload ${metadata.appId} screenshot`, ssSha);
+            const ssPath = 'store/' + ss.path;
+            const ssSha = await getSha(ssPath);
+            await githubPut(ssPath, ss.content, `Upload ${metadata.appId} screenshot`, ssSha);
         }
 
         // 5. Update browsing manifest (SLIM)
         this.log('Updating GitHub store manifest (slim)...');
         const manifestPath = 'manifests/store-manifest.json';
-        const manifestSha = await getSha(manifestPath);
+        const storeManifestPath = 'store/' + manifestPath;
+        const manifestSha = await getSha(storeManifestPath);
         let manifestData = { apps: [] };
         
-        const mRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${manifestPath}`);
+        const mRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${storeManifestPath}`, {
+            headers: { 'Authorization': `token ${token}` }
+        });
         if (mRes.ok) {
             const mData = await mRes.json();
             manifestData = JSON.parse(atob(mData.content));
@@ -1390,13 +1396,14 @@ class HentHubUploader {
         else manifestData.apps.push(slimEntry);
 
         manifestData.lastUpdated = new Date().toISOString();
-        await githubPut(manifestPath, btoa(JSON.stringify(manifestData, null, 2)), `Update store manifest (slim): ${metadata.appId}`, manifestSha);
+        await githubPut(storeManifestPath, btoa(JSON.stringify(manifestData, null, 2)), `Update store manifest (slim): ${metadata.appId}`, manifestSha);
         
         // 6. Save FULL individual manifest
         const individualManifestPath = `manifests/${subfolder}/${metadata.appId.toLowerCase()}.json`;
-        this.log(`Pushing individual manifest to GitHub: ${individualManifestPath}...`);
-        const individualSha = await getSha(individualManifestPath);
-        await githubPut(individualManifestPath, btoa(JSON.stringify(metadata, null, 2)), `Save full manifest: ${metadata.appId}`, individualSha);
+        const storeIndividualPath = 'store/' + individualManifestPath;
+        this.log(`Pushing individual manifest to GitHub: ${storeIndividualPath}...`);
+        const individualSha = await getSha(storeIndividualPath);
+        await githubPut(storeIndividualPath, btoa(JSON.stringify(metadata, null, 2)), `Save full manifest: ${metadata.appId}`, individualSha);
     }
 
     async scanFilesRecursively(entries) {
