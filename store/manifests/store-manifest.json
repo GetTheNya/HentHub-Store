@@ -102,15 +102,15 @@
       "appId": "DESKTOYS",
       "name": "DeskToys",
       "extensionType": "application",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "author": "GetTheNya",
-      "description": "Turn your desktop into a playground. DeskToys lets you deploy, manage, and interact with widgets, making your workspace truly yours.",
+      "description": "Desktop widget management system",
       "minOSVersion": "1.1.0",
       "terminalOnly": false,
       "screenshotCount": 1,
-      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/application/desktoys-v1.1.0.hub",
+      "downloadUrl": "https://GetTheNya.github.io/HentHub-Store/packages/application/desktoys-v1.1.1.hub",
       "iconUrl": "https://GetTheNya.github.io/HentHub-Store/assets/icons/application/desktoys.png",
-      "publishedDate": "2026-02-14T13:37:16.556Z"
+      "publishedDate": "2026-02-14T16:42:58.967Z"
     },
     {
       "appId": "NEONWAVE",
@@ -141,5 +141,5 @@
       "publishedDate": "2026-02-14T14:57:51.969Z"
     }
   ],
-  "lastUpdated": "2026-02-14T14:57:51.969Z"
+  "lastUpdated": "2026-02-14T16:42:58.967Z"
 }
