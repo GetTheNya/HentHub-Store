@@ -1,0 +1,32 @@
+{
+  "appId": "DESKTOYS",
+  "name": "DeskToys",
+  "extensionType": "application",
+  "version": "1.1.0",
+  "author": "GetTheNya",
+  "description": "Desktop widget management system",
+  "terminalOnly": false,
+  "singleInstance": true,
+  "minOSVersion": "1.1.0",
+  "permissions": [
+    "registry",
+    "filesystem"
+  ],
+  "entryPoint": "Program.cs",
+  "entryClass": "DeskToys.Program",
+  "entryMethod": "Main",
+  "widgetClass": "",
+  "defaultSize": {
+    "width": 200,
+    "height": 200
+  },
+  "isResizable": false,
+  "refreshPolicy": "Interval",
+  "intervalMs": 0,
+  "subscriptions": [],
+  "size": 94453,
+  "icon": "desktoys.png",
+  "screenshotCount": 1,
+  "dependencies": [],
+  "references": []
+}
