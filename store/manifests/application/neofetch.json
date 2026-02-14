@@ -1,0 +1,31 @@
+{
+  "appId": "NEOFETCH",
+  "name": "Neofetch Utility",
+  "extensionType": "application",
+  "version": "1.0.0",
+  "author": "GetTheNya",
+  "description": "I can't believe it's not Linux.",
+  "terminalOnly": true,
+  "singleInstance": false,
+  "minOSVersion": "1.0.0",
+  "permissions": [],
+  "entryPoint": "Program.cs",
+  "entryClass": "Neofetch.Program",
+  "entryMethod": "Main",
+  "widgetClass": "",
+  "defaultSize": {
+    "width": 200,
+    "height": 200
+  },
+  "isResizable": false,
+  "refreshPolicy": "Interval",
+  "intervalMs": 0,
+  "subscriptions": [],
+  "size": 194562,
+  "icon": "neofetch.png",
+  "screenshotCount": 1,
+  "dependencies": [
+    "TERMINAL"
+  ],
+  "references": []
+}
