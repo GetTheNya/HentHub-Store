@@ -434,8 +434,8 @@ class HentHubUploader {
         // Navigation Buttons
         this.nextToStage2Btn.addEventListener('click', () => this.showStage(2));
         document.getElementById('back-to-stage-1').addEventListener('click', () => this.showStage(1));
-        document.getElementById('next-to-stage-3').addEventListener('click', () => {
-            if (this.validateStage2()) {
+        document.getElementById('next-to-stage-3').addEventListener('click', async () => {
+            if (await this.validateStage2()) {
                 this.renderSummary();
                 this.showStage(3);
             }
@@ -651,8 +651,8 @@ class HentHubUploader {
         });
     }
 
-    validateStage2() {
-        return this.validateForm();
+    async validateStage2() {
+        return await this.validateForm();
     }
 
     renderSummary() {
