@@ -1051,7 +1051,7 @@ class HentHubUploader {
             for (let i = 0; i < screenshotFiles.length; i++) {
                 const content = await this.fileToBase64(screenshotFiles[i]);
                 screenshots.push({
-                    path: `store/assets/screenshots/${subfolder}/${appId.toLowerCase()}/${i}.png`,
+                    path: `assets/screenshots/${subfolder}/${appId.toLowerCase()}/${i}.png`,
                     content: content
                 });
             }
