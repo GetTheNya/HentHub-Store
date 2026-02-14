@@ -54,6 +54,7 @@ class HentHubUploader {
         this.currentEditingAppData = null;
         this.lastManifestIcon = null;
 
+        this.isLoadingManifest = false;
         this.DEFAULT_TERMINAL_ICON_PATH = 'assets/icons/terminal_app.png';
 
         // Reveal this instance for modal buttons
@@ -537,7 +538,10 @@ class HentHubUploader {
                 }
             }
         });
-        this.sourceInput.addEventListener('change', () => this.updateFileList());
+        this.sourceInput.addEventListener('change', () => {
+            this.lastManifestIcon = null; // Reset on new selection
+            this.updateFileList();
+        });
 
         // Terminal Only toggle
         this.terminalOnlyCheckbox.addEventListener('change', () => {
@@ -564,154 +568,87 @@ class HentHubUploader {
     }
 
     readManifestFile(file, autoJump = true) {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const manifest = JSON.parse(e.target.result);
-                
-                // Detect Extension Type
-                const type = manifest.extensionType;
-                if (!type) {
-                    this.showModal('Invalid Manifest', 'Manifest is missing the required <code>extensionType</code> field (must be "application" or "widget").', 'error');
-                    this.manifestPreviewText.textContent = '❌ Error: Missing extensionType';
-                    this.manifestPreviewText.style.color = 'var(--error)';
-                    this.nextToStage2Btn.style.display = 'none';
-                    return;
-                }
-
-                this.extensionTypeInput.value = type;
-                this.typeBadge.textContent = `Detected: ${type.charAt(0).toUpperCase() + type.slice(1)}`;
-                
-                // Toggle app/widget specific fields
-                if (type === 'widget') {
-                    this.appFields.style.display = 'none';
-                    this.widgetFields.style.display = 'block';
+        if (!file) return Promise.resolve();
+        this.isLoadingManifest = true;
+        this.log(`Reading local manifest: ${file.name}...`, 'info');
+        
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const manifest = JSON.parse(e.target.result);
+                    const type = manifest.extensionType;
                     
-                    // Widget specific pre-fill
-                    const widgetFields = ['widgetClass', 'refreshPolicy', 'intervalMs'];
-                    widgetFields.forEach(field => {
-                        if (manifest[field] !== undefined) {
-                            const input = document.getElementById(field);
-                            if (input) input.value = manifest[field];
-                        }
-                    });
-                    
-                    if (manifest.defaultSize) {
-                        if (manifest.defaultSize.width) document.getElementById('width').value = manifest.defaultSize.width;
-                        if (manifest.defaultSize.height) document.getElementById('height').value = manifest.defaultSize.height;
-                    }
-                    
-                    if (manifest.isResizable !== undefined) {
-                        document.getElementById('isResizable').checked = manifest.isResizable;
-                    }
-                    
-                    if (manifest.subscriptions && Array.isArray(manifest.subscriptions)) {
-                        document.getElementById('subscriptions').value = manifest.subscriptions.join(', ');
-                    }
-                } else {
-                    this.appFields.style.display = 'block';
-                    this.widgetFields.style.display = 'none';
-                    
-                    // App specific pre-fill
-                    const appFields = ['entryPoint', 'entryClass', 'entryMethod'];
-                    appFields.forEach(field => {
-                        if (manifest[field] !== undefined) {
-                            const input = document.getElementById(field);
-                            if (input) input.value = manifest[field];
-                        }
-                    });
-
-                    if (manifest.singleInstance !== undefined) {
-                        document.getElementById('singleInstance').checked = manifest.singleInstance;
+                    if (!type) {
+                        this.showModal('Invalid Manifest', 'Manifest is missing the required <code>extensionType</code> field.', 'error');
+                        this.isLoadingManifest = false;
+                        resolve();
+                        return;
                     }
 
-                    if (manifest.terminalOnly !== undefined) {
-                        this.terminalOnlyCheckbox.checked = manifest.terminalOnly;
-                        this.terminalOnlyCheckbox.dispatchEvent(new Event('change'));
-                    }
-                }
+                    this.extensionTypeInput.value = type;
+                    this.typeBadge.textContent = `Detected: ${type.charAt(0).toUpperCase() + type.slice(1)}`;
 
-                // Common fields pre-fill
-                const commonFields = ['appId', 'name', 'version', 'author', 'description', 'minOSVersion'];
-                commonFields.forEach(field => {
-                    let val = manifest[field];
-                    
-                    // Fallback for widget "id" if "appId" is missing
-                    if (field === 'appId' && val === undefined) {
-                        val = manifest.id;
-                    }
-
-                    if (val !== undefined) {
-                        const input = document.getElementById(field);
-                        if (input) {
-                            input.value = val;
-                            if (field === 'appId') input.dispatchEvent(new Event('input'));
-                        }
-                    }
-                });
-
-                if (manifest.permissions && Array.isArray(manifest.permissions)) {
-                    document.getElementById('permissions').value = manifest.permissions.join(', ');
-                }
-
-                if (manifest.refreshPolicy) {
-                    this.refreshPolicySelect.value = manifest.refreshPolicy;
-                    const isInterval = manifest.refreshPolicy === 'Interval';
-                    this.intervalGroup.classList.toggle('hidden', !isInterval);
-                }
-                if (manifest.intervalMs !== undefined) {
-                    document.getElementById('intervalMs').value = manifest.intervalMs;
-                }
-
-                if (manifest.icon) {
-                    this.lastManifestIcon = manifest.icon;
-                    this.log(`Manifest icon set to: ${this.lastManifestIcon}`, 'info');
-                } else {
-                    this.log(`Manifest has no 'icon' field, defaulting to icon.png`, 'warning');
-                    this.lastManifestIcon = 'icon.png';
-                }
-
-                if (manifest.dependencies && Array.isArray(manifest.dependencies)) {
-                    this.selectedDependencies.clear();
-                    this.selectedDepsContainer.innerHTML = '';
-                    manifest.dependencies.forEach(d => this.addDependency(d));
-                }
-
-                // Handle References (Read-only)
-                const refs = manifest.references || manifest.References || [];
-                window.currentManifestReferences = refs;
-                
-                if (Array.isArray(refs) && refs.length > 0) {
-                    this.log(`Detected ${refs.length} library references`, 'info');
-                    if (this.referencesSection) {
-                        this.referencesSection.classList.remove('hidden');
-                        this.referencesList.innerHTML = '';
-                        refs.forEach(ref => {
-                            const tag = document.createElement('span');
-                            tag.className = 'meta-tag';
-                            tag.style.borderColor = 'var(--accent)';
-                            tag.innerHTML = `<b>${ref}</b>`;
-                            this.referencesList.appendChild(tag);
+                    // Prefill logic
+                    if (type === 'widget') {
+                        this.appFields.style.display = 'none';
+                        this.widgetFields.style.display = 'block';
+                        ['widgetClass', 'refreshPolicy', 'intervalMs'].forEach(f => {
+                            if (manifest[f] !== undefined) document.getElementById(f).value = manifest[f];
                         });
+                        if (manifest.defaultSize) {
+                            document.getElementById('width').value = manifest.defaultSize.width || 0;
+                            document.getElementById('height').value = manifest.defaultSize.height || 0;
+                        }
+                    } else {
+                        this.appFields.style.display = 'block';
+                        this.widgetFields.style.display = 'none';
+                        ['entryPoint', 'entryClass', 'entryMethod'].forEach(f => {
+                            if (manifest[f] !== undefined) document.getElementById(f).value = manifest[f];
+                        });
+                        if (manifest.terminalOnly !== undefined) {
+                            this.terminalOnlyCheckbox.checked = manifest.terminalOnly;
+                            this.terminalOnlyCheckbox.dispatchEvent(new Event('change'));
+                        }
                     }
-                } else {
-                    if (this.referencesSection) this.referencesSection.classList.add('hidden');
-                }
 
-                if (autoJump) {
-                    this.manifestPreviewText.textContent = `✅ ${file.name} loaded (${type})`;
-                    this.manifestPreviewText.style.display = 'block';
-                    this.nextToStage2Btn.style.display = 'block';
-                    this.showStage(2);
-                }
+                    ['appId', 'name', 'version', 'author', 'description', 'minOSVersion'].forEach(f => {
+                        let val = manifest[f] || (f === 'appId' ? manifest.id : undefined);
+                        if (val !== undefined) {
+                            const input = document.getElementById(f);
+                            if (input) {
+                                input.value = val;
+                                if (f === 'appId') input.dispatchEvent(new Event('input'));
+                            }
+                        }
+                    });
 
-                this.log(`Manifest loaded: ${file.name} (${type})`, 'success');
-            } catch (err) {
-                this.showModal('Parse Error', 'Error parsing manifest.json. Please ensure it is valid JSON.', 'error');
-            }
-        };
-        reader.readAsText(file);
+                    if (manifest.icon) {
+                        this.lastManifestIcon = manifest.icon;
+                        this.log(`Icon set from local manifest: ${this.lastManifestIcon}`, 'success');
+                    } else {
+                        this.lastManifestIcon = 'icon.png';
+                        this.log('No icon in manifest, defaulting to icon.png', 'warning');
+                    }
+
+                    if (manifest.dependencies) {
+                        this.selectedDependencies.clear();
+                        this.selectedDepsContainer.innerHTML = '';
+                        manifest.dependencies.forEach(d => this.addDependency(d));
+                    }
+
+                    if (autoJump) this.showStage(2);
+                    
+                    this.isLoadingManifest = false;
+                    resolve();
+                } catch (err) {
+                    this.log(`Error parsing manifest: ${err.message}`, 'error');
+                    this.isLoadingManifest = false;
+                    resolve();
+                }
+            };
+            reader.readAsText(file);
+        });
     }
 
     validateStage2() {
@@ -804,7 +741,17 @@ class HentHubUploader {
         `;
     }
 
-    validateForm() {
+    async validateForm() {
+        // Wait for manifest async load if pending
+        if (this.isLoadingManifest) {
+            this.log('Waiting for manifest to finish loading...', 'info');
+            let checks = 0;
+            while (this.isLoadingManifest && checks < 50) {
+                await new Promise(r => setTimeout(r, 100));
+                checks++;
+            }
+        }
+
         const type = this.extensionTypeInput.value;
         const mandatory = [
             { id: 'appId', label: 'App ID' },
@@ -943,11 +890,22 @@ class HentHubUploader {
             return;
         }
 
-        // Recursive counting: the browser file list is already flat, so length IS the count of all files inside.
         this.fileList.style.display = 'block';
         this.fileList.innerHTML = `<strong>Found ${files.length} total files:</strong><br>` + 
             Array.from(files).slice(0, 5).map(f => f.webkitRelativePath || f.name).join('<br>') +
             (files.length > 5 ? `<br>...and ${files.length - 5} more` : '');
+
+        // Automatically scan for manifest.json if it wasn't already loaded via drop
+        const manifestFile = Array.from(files).find(f => {
+            const name = f.name.toLowerCase();
+            const path = (f.webkitRelativePath || "").toLowerCase().replace(/\\/g, '/');
+            return name === 'manifest.json' || path.endsWith('/manifest.json') || path === 'manifest.json';
+        });
+
+        if (manifestFile) {
+            this.log(`Manifest detected in file selection: ${manifestFile.webkitRelativePath || manifestFile.name}`, 'info');
+            this.readManifestFile(manifestFile, false);
+        }
     }
 
     searchDependencies() {
@@ -1014,7 +972,8 @@ class HentHubUploader {
         e.preventDefault();
         
         // Form Validation
-        if (!this.validateForm()) return;
+        const isValid = await this.validateForm();
+        if (!isValid) return;
 
         // Final ID check (Skip if in Edit Mode for the same ID)
         const appId = this.appIdInput.value.toUpperCase();
