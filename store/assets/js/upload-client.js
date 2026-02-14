@@ -54,7 +54,7 @@ class HentHubUploader {
         this.currentEditingAppData = null;
         this.lastManifestIcon = null;
 
-        this.DEFAULT_TERMINAL_ICON_PATH = 'assets/icons/terminal.png';
+        this.DEFAULT_TERMINAL_ICON_PATH = 'assets/icons/terminal_app.png';
 
         // Reveal this instance for modal buttons
         window.uploader = this;
